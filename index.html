@@ -622,8 +622,10 @@
       console.log('Alpine initialized, creating icons...');
       lucide.createIcons();
       
+      var createIconsTimer;
       const observer = new MutationObserver(() => {
-        lucide.createIcons();
+        clearTimeout(createIconsTimer);
+        createIconsTimer = setTimeout(() => lucide.createIcons(), 50);
       });
       observer.observe(document.body, { childList: true, subtree: true });
     });

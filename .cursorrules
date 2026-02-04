@@ -1,0 +1,35 @@
+# GymBro PWA — Cursor Rules
+
+## Tech Stack
+- Alpine.js 3.14+ (reactivity)
+- Tailwind CSS via CDN (no build)
+- Lucide Icons
+- localStorage for persistence
+- Service Worker for offline
+
+## Hard Constraints
+1. **No build tools** — no npm, webpack, vite. All scripts load via CDN or relative paths.
+2. **Script order in index.html** — data.js → storage.js → exercises.js → app.js. Do not change.
+3. **Page switching** — use `x-if` for main pages (dashboard, select-workout, workout, cardio, complete), not `x-show`.
+4. **Paths** — always use `./` relative paths for GitHub Pages compatibility.
+5. **UI language** — Russian.
+
+## File Responsibilities
+- `js/app.js`: Alpine component gymTracker(), state, selectWorkout, saveWorkout, loadData, updateStats
+- `js/data.js`: WORKOUT_TEMPLATES (static)
+- `js/storage.js`: Storage wrapper for localStorage
+- `icons/exercises.js`: EXERCISE_ICONS object
+- `sw.js`: increment CACHE_NAME when deploying changes
+
+## Patterns
+- Buttons: always `type="button"`
+- Nullish coalescing for lastWeight: `??` not `||` (0 is valid)
+- x-for: use pre-built array (e.g. workoutList), not Object.entries in template
+- selectWorkout: deep copy with JSON.parse(JSON.stringify(...))
+- Base URL: only set for hostname containing `github.io`
+
+## Reference Docs
+- DATA_FLOW.md — data flow, init sequence
+- docs/FEATURES.md — feature specs
+- docs/STYLE_GUIDE.md — styling reference
+- CURSOR_PROMPT.md — full project context
