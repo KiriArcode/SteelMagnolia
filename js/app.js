@@ -1,0 +1,290 @@
+/**
+ * GymBro - Main Alpine.js Component
+ */
+function gymTracker() {
+  return {
+    // ===== STATE =====
+    page: 'dashboard',
+    
+    // Profile
+    profile: {
+      name: 'Николай',
+      age: 36,
+      maxHR: 184,
+      fatBurnLow: 110,
+      fatBurnHigh: 138,
+      intervalLow: 147,
+      intervalHigh: 166,
+    },
+    
+    // Stats
+    stats: {
+      streak: 12,
+      weekCompleted: 5,
+      weekTotal: 7,
+      cardioMinutes: 245,
+      avgMood: 7.8,
+    },
+    
+    // Workouts data
+    workouts: WORKOUT_TEMPLATES, // from data.js
+    currentWorkout: null,
+    currentExerciseIndex: 0,
+    
+    // Exercise state
+    sets: [],
+    currentWeight: 20,
+    currentReps: 12,
+    showAlternatives: false,
+    selectedAlt: null,
+    
+    // Cardio
+    isCardioOnly: false,
+    cardioData: {
+      type: 'treadmill',
+      duration: 30,
+      podcast: '',
+    },
+    cardioTypes: [
+      { id: 'treadmill', name: 'Дорожка', icon: 'treadmill' },
+      { id: 'bike', name: 'Велосипед', icon: 'bike' },
+      { id: 'stepper', name: 'Степпер', icon: 'stepper' },
+    ],
+    
+    // Mood
+    moodPost: 7,
+    moodDay: 7,
+    notes: '',
+    
+    // Recent workouts
+    recentWorkouts: [],
+    
+    // ===== COMPUTED =====
+    get currentExercise() {
+      return this.currentWorkout?.exercises[this.currentExerciseIndex];
+    },
+    
+    get currentExerciseSets() {
+      return this.sets.filter(s => s.exerciseIndex === this.currentExerciseIndex);
+    },
+    
+    // ===== INIT =====
+    init() {
+      // Load data from localStorage
+      this.loadData();
+      
+      // Load profile from localStorage
+      const savedProfile = Storage.getProfile();
+      if (savedProfile) {
+        this.profile = { ...this.profile, ...savedProfile };
+      }
+      
+      // Calculate HR zones based on age
+      this.calculateHRZones();
+      
+      console.log('GymBro initialized');
+    },
+    
+    // ===== METHODS =====
+    calculateHRZones() {
+      const maxHR = 220 - this.profile.age;
+      this.profile.maxHR = maxHR;
+      this.profile.fatBurnLow = Math.round(maxHR * 0.6);
+      this.profile.fatBurnHigh = Math.round(maxHR * 0.75);
+      this.profile.intervalLow = Math.round(maxHR * 0.8);
+      this.profile.intervalHigh = Math.round(maxHR * 0.9);
+    },
+    
+    getTodayPlan() {
+      const days = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
+      const today = new Date().getDay();
+      const dayName = days[today];
+      
+      const plans = {
+        0: 'Отдых',
+        1: 'Кардио 45-60 мин',
+        2: 'Upper Body',
+        3: 'Кардио 45-60 мин',
+        4: 'Lower Body',
+        5: 'Кардио 45-60 мин',
+        6: 'Full Body + Core',
+      };
+      
+      return `Сегодня: ${dayName} — ${plans[today]}`;
+    },
+    
+    selectWorkout(key) {
+      this.currentWorkout = { ...this.workouts[key], key };
+      this.currentExerciseIndex = 0;
+      this.sets = [];
+      this.selectedAlt = null;
+      this.showAlternatives = false;
+      
+      // Set initial weight/reps from first exercise
+      const firstEx = this.currentWorkout.exercises[0];
+      this.currentWeight = firstEx.lastWeight || 20;
+      this.currentReps = typeof firstEx.reps === 'number' ? firstEx.reps : 12;
+      
+      this.page = 'workout';
+    },
+    
+    recordSet() {
+      // Save the set
+      this.sets.push({
+        exerciseIndex: this.currentExerciseIndex,
+        exerciseId: this.currentExercise.id,
+        exerciseName: this.selectedAlt || this.currentExercise.name,
+        weight: this.currentWeight,
+        reps: this.currentReps,
+        timestamp: new Date().toISOString(),
+      });
+      
+      // Check if all sets completed for this exercise
+      const targetSets = this.currentExercise.sets;
+      if (this.currentExerciseSets.length >= targetSets) {
+        this.nextExercise();
+      }
+    },
+    
+    nextExercise() {
+      if (this.currentExerciseIndex < this.currentWorkout.exercises.length - 1) {
+        this.currentExerciseIndex++;
+        this.selectedAlt = null;
+        this.showAlternatives = false;
+        
+        // Load next exercise defaults
+        const nextEx = this.currentExercise;
+        this.currentWeight = nextEx.lastWeight || this.currentWeight;
+        this.currentReps = typeof nextEx.reps === 'number' ? nextEx.reps : 12;
+      } else {
+        // All exercises done, go to cardio
+        this.isCardioOnly = false;
+        this.cardioData.duration = this.currentWorkout.cardio || 30;
+        this.page = 'cardio';
+      }
+    },
+    
+    prevExercise() {
+      if (this.currentExerciseIndex > 0) {
+        this.currentExerciseIndex--;
+        this.selectedAlt = null;
+        this.showAlternatives = false;
+        
+        const prevEx = this.currentExercise;
+        this.currentWeight = prevEx.lastWeight || this.currentWeight;
+        this.currentReps = typeof prevEx.reps === 'number' ? prevEx.reps : 12;
+      }
+    },
+    
+    saveWorkout() {
+      // Create workout record
+      const workout = {
+        id: Date.now(),
+        date: new Date().toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }),
+        dateISO: new Date().toISOString(),
+        type: this.currentWorkout?.key || 'cardio',
+        name: this.currentWorkout?.name || 'Кардио',
+        sets: [...this.sets],
+        cardio: { ...this.cardioData },
+        moodPost: this.moodPost,
+        moodDay: this.moodDay,
+        notes: this.notes,
+        mood: this.moodPost, // for display
+      };
+      
+      // Save to storage
+      Storage.saveWorkout(workout);
+      
+      // Update stats
+      this.updateStats(workout);
+      
+      // Reset state
+      this.currentWorkout = null;
+      this.currentExerciseIndex = 0;
+      this.sets = [];
+      this.moodPost = 7;
+      this.moodDay = 7;
+      this.notes = '';
+      this.isCardioOnly = false;
+      
+      // Reload recent workouts
+      this.loadData();
+      
+      // Go to dashboard
+      this.page = 'dashboard';
+    },
+    
+    updateStats(workout) {
+      // Update streak
+      this.stats.weekCompleted = Math.min(7, this.stats.weekCompleted + 1);
+      
+      // Update cardio minutes
+      if (workout.cardio?.duration) {
+        this.stats.cardioMinutes += workout.cardio.duration;
+      }
+      
+      // Update average mood
+      const allWorkouts = Storage.getWorkouts();
+      if (allWorkouts.length > 0) {
+        const totalMood = allWorkouts.reduce((sum, w) => sum + (w.moodPost || 7), 0);
+        this.stats.avgMood = totalMood / allWorkouts.length;
+      }
+      
+      // Save stats
+      Storage.saveStats(this.stats);
+    },
+    
+    loadData() {
+      // Load stats
+      const savedStats = Storage.getStats();
+      if (savedStats) {
+        this.stats = { ...this.stats, ...savedStats };
+      }
+      
+      // Load recent workouts
+      this.recentWorkouts = Storage.getWorkouts().slice(0, 5);
+      
+      // Load last weights for exercises
+      this.loadLastWeights();
+    },
+    
+    loadLastWeights() {
+      const workouts = Storage.getWorkouts();
+      
+      // Update lastWeight for each exercise based on history
+      Object.keys(this.workouts).forEach(workoutKey => {
+        this.workouts[workoutKey].exercises.forEach(exercise => {
+          // Find last set for this exercise
+          for (const workout of workouts) {
+            const lastSet = workout.sets?.find(s => s.exerciseId === exercise.id);
+            if (lastSet) {
+              exercise.lastWeight = lastSet.weight;
+              break;
+            }
+          }
+        });
+      });
+    },
+    
+    // ===== HELPERS =====
+    getMoodEmoji(mood) {
+      if (mood >= 8) return '😊';
+      if (mood >= 5) return '😐';
+      return '😔';
+    },
+    
+    getWorkoutTypeColor(type) {
+      const colors = {
+        tuesday: 'bg-blue-500/30',
+        thursday: 'bg-green-500/30',
+        saturday: 'bg-orange-500/30',
+        cardio: 'bg-purple-500/30',
+      };
+      return colors[type] || 'bg-gray-500/30';
+    },
+    
+    getExerciseIcon(iconName) {
+      return EXERCISE_ICONS[iconName] || EXERCISE_ICONS.dumbbell;
+    },
+  };
+}

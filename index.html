@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#111827">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  
+  <title>GymBro</title>
+  
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            gray: {
+              900: '#111827',
+              800: '#1f2937',
+              700: '#374151',
+              600: '#4b5563',
+              500: '#6b7280',
+              400: '#9ca3af',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- Alpine.js -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.3/dist/cdn.min.js"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/custom.css">
+</head>
+<body class="bg-gray-900 text-white min-h-screen" x-data="gymTracker()">
+
+  <!-- ========== СТРАНИЦА: DASHBOARD ========== -->
+  <div x-show="page === 'dashboard'" x-cloak class="min-h-screen p-4 pb-24">
+    
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+      <div>
+        <h1 class="text-2xl font-bold">GymBro</h1>
+        <p class="text-gray-400 text-sm">Привет, <span x-text="profile.name"></span>! 👋</p>
+      </div>
+      <div class="text-right">
+        <p class="text-sm text-gray-400">Стрик</p>
+        <p class="text-2xl font-bold text-orange-400 flex items-center gap-1">
+          <i data-lucide="flame" class="w-5 h-5"></i>
+          <span x-text="stats.streak"></span>
+        </p>
+      </div>
+    </div>
+
+    <!-- Week Progress Card -->
+    <div class="bg-gray-800 rounded-2xl p-4 mb-4">
+      <div class="flex justify-between items-center mb-3">
+        <span class="text-gray-400">Эта неделя</span>
+        <span class="text-lg font-semibold">
+          <span x-text="stats.weekCompleted"></span>/<span x-text="stats.weekTotal"></span>
+        </span>
+      </div>
+      
+      <!-- Week days -->
+      <div class="flex gap-1 mb-3">
+        <template x-for="(day, index) in ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']" :key="day">
+          <div class="flex-1 text-center">
+            <div 
+              class="h-10 rounded-lg mb-1 flex items-center justify-center transition-colors"
+              :class="{
+                'bg-green-500': index < stats.weekCompleted,
+                'bg-blue-500 animate-pulse': index === stats.weekCompleted,
+                'bg-gray-700': index > stats.weekCompleted
+              }"
+            >
+              <i x-show="index < stats.weekCompleted" data-lucide="check" class="w-5 h-5"></i>
+            </div>
+            <span class="text-xs text-gray-500" x-text="day"></span>
+          </div>
+        </template>
+      </div>
+      
+      <!-- Stats row -->
+      <div class="flex justify-between text-sm">
+        <div class="text-center">
+          <p class="text-gray-400">Кардио</p>
+          <p class="font-semibold text-blue-400"><span x-text="stats.cardioMinutes"></span> мин</p>
+        </div>
+        <div class="text-center">
+          <p class="text-gray-400">Настроение</p>
+          <p class="font-semibold text-green-400">⌀ <span x-text="stats.avgMood.toFixed(1)"></span></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- HR Zones Card -->
+    <div class="bg-gradient-to-r from-red-900/50 to-orange-900/50 rounded-2xl p-4 mb-4 border border-red-700/50">
+      <div class="flex items-center gap-2 mb-2">
+        <i data-lucide="heart" class="w-5 h-5 text-red-400"></i>
+        <span class="font-semibold">Пульсовые зоны</span>
+        <span class="text-xs text-gray-400 ml-auto">Возраст: <span x-text="profile.age"></span></span>
+      </div>
+      <div class="grid grid-cols-3 gap-2 text-center">
+        <div class="bg-gray-800/50 rounded-lg p-2">
+          <p class="text-xs text-gray-400">Макс ЧСС</p>
+          <p class="text-xl font-bold text-red-400" x-text="profile.maxHR"></p>
+        </div>
+        <div class="bg-gray-800/50 rounded-lg p-2">
+          <p class="text-xs text-gray-400">Жиросжигание</p>
+          <p class="text-xl font-bold text-orange-400">
+            <span x-text="profile.fatBurnLow"></span>-<span x-text="profile.fatBurnHigh"></span>
+          </p>
+        </div>
+        <div class="bg-gray-800/50 rounded-lg p-2">
+          <p class="text-xs text-gray-400">Интервал</p>
+          <p class="text-xl font-bold text-yellow-400">
+            <span x-text="profile.intervalLow"></span>-<span x-text="profile.intervalHigh"></span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Start Workout Button -->
+    <button
+      @click="page = 'select-workout'"
+      class="w-full bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl p-5 mb-4 flex items-center justify-between shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-transform"
+    >
+      <div class="flex items-center gap-3">
+        <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
+          <i data-lucide="dumbbell" class="w-8 h-8"></i>
+        </div>
+        <div class="text-left">
+          <p class="font-bold text-lg">Начать тренировку</p>
+          <p class="text-blue-200 text-sm" x-text="getTodayPlan()"></p>
+        </div>
+      </div>
+      <i data-lucide="chevron-right" class="w-6 h-6"></i>
+    </button>
+
+    <!-- Recent Workouts -->
+    <div class="bg-gray-800 rounded-2xl p-4">
+      <h3 class="font-semibold mb-3 flex items-center gap-2">
+        <i data-lucide="calendar" class="w-5 h-5 text-gray-400"></i>
+        Последние тренировки
+      </h3>
+      <div class="space-y-2">
+        <template x-for="workout in recentWorkouts" :key="workout.id">
+          <div class="flex items-center gap-3 bg-gray-700/50 rounded-xl p-3">
+            <div 
+              class="w-10 h-10 rounded-lg flex items-center justify-center"
+              :class="getWorkoutTypeColor(workout.type)"
+            >
+              <i :data-lucide="workout.type === 'cardio' ? 'activity' : 'dumbbell'" class="w-5 h-5"></i>
+            </div>
+            <div class="flex-1">
+              <p class="font-medium" x-text="workout.name"></p>
+              <p class="text-sm text-gray-400" x-text="workout.date"></p>
+            </div>
+            <div class="text-right">
+              <p class="text-lg" x-text="getMoodEmoji(workout.mood)"></p>
+              <p class="text-xs text-gray-400"><span x-text="workout.mood"></span>/10</p>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== СТРАНИЦА: SELECT WORKOUT ========== -->
+  <div x-show="page === 'select-workout'" x-cloak class="min-h-screen p-4">
+    
+    <!-- Header -->
+    <div class="flex items-center gap-3 mb-6">
+      <button @click="page = 'dashboard'" class="p-2 hover:bg-gray-800 rounded-lg">
+        <i data-lucide="chevron-left" class="w-6 h-6"></i>
+      </button>
+      <h1 class="text-xl font-bold">Выбери тренировку</h1>
+    </div>
+
+    <!-- Workout Cards -->
+    <div class="space-y-3">
+      <template x-for="(workout, key) in workouts" :key="key">
+        <button
+          @click="selectWorkout(key)"
+          class="w-full rounded-2xl p-4 flex items-center gap-4 shadow-lg active:scale-[0.98] transition-transform"
+          :class="workout.gradient"
+        >
+          <div class="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center p-2">
+            <div x-html="getExerciseIcon(workout.exercises[0]?.icon || 'dumbbell')"></div>
+          </div>
+          <div class="flex-1 text-left">
+            <p class="text-2xl mb-1" x-text="workout.emoji"></p>
+            <p class="font-bold text-lg" x-text="workout.name"></p>
+            <p class="text-white/70 text-sm">
+              <span x-text="workout.exercises.length"></span> упражнений + 
+              <span x-text="workout.cardio"></span> мин кардио
+            </p>
+          </div>
+          <i data-lucide="chevron-right" class="w-6 h-6"></i>
+        </button>
+      </template>
+
+      <!-- Cardio Only -->
+      <button
+        @click="page = 'cardio'; isCardioOnly = true"
+        class="w-full bg-gradient-to-r from-purple-500 to-pink-600 rounded-2xl p-4 flex items-center gap-4 shadow-lg active:scale-[0.98] transition-transform"
+      >
+        <div class="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center p-2">
+          <div x-html="getExerciseIcon('treadmill')"></div>
+        </div>
+        <div class="flex-1 text-left">
+          <p class="text-2xl mb-1">🏃</p>
+          <p class="font-bold text-lg">Только кардио</p>
+          <p class="text-white/70 text-sm">Пн/Ср/Пт — 45-60 минут</p>
+        </div>
+        <i data-lucide="chevron-right" class="w-6 h-6"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- ========== СТРАНИЦА: WORKOUT ========== -->
+  <div x-show="page === 'workout'" x-cloak class="min-h-screen pb-32">
+    
+    <!-- Header -->
+    <div 
+      class="p-4"
+      :class="currentWorkout?.gradient || 'bg-gradient-to-r from-blue-500 to-blue-600'"
+    >
+      <div class="flex items-center justify-between mb-2">
+        <button @click="page = 'select-workout'" class="p-2 hover:bg-white/20 rounded-lg">
+          <i data-lucide="chevron-left" class="w-6 h-6"></i>
+        </button>
+        <div class="text-center">
+          <p class="text-sm opacity-80" x-text="currentWorkout?.name"></p>
+          <p class="font-bold">
+            <span x-text="currentExerciseIndex + 1"></span> / 
+            <span x-text="currentWorkout?.exercises.length"></span>
+          </p>
+        </div>
+        <button @click="page = 'complete'" class="p-2 hover:bg-white/20 rounded-lg text-sm">
+          Завершить
+        </button>
+      </div>
+      
+      <!-- Progress bar -->
+      <div class="h-2 bg-white/20 rounded-full overflow-hidden">
+        <div 
+          class="h-full bg-white transition-all duration-300"
+          :style="`width: ${((currentExerciseIndex + 1) / (currentWorkout?.exercises.length || 1)) * 100}%`"
+        ></div>
+      </div>
+    </div>
+
+    <!-- Exercise Card -->
+    <div class="p-4">
+      <div class="bg-gray-800 rounded-2xl p-4 mb-4">
+        <div class="flex items-start gap-4 mb-4">
+          <div class="w-20 h-20 bg-gray-700 rounded-xl p-2">
+            <div x-html="getExerciseIcon(currentExercise?.icon)"></div>
+          </div>
+          <div class="flex-1">
+            <h2 class="font-bold text-lg" x-text="selectedAlt || currentExercise?.name"></h2>
+            <p class="text-gray-400">
+              <span x-text="currentExercise?.sets"></span>×<span x-text="currentExercise?.reps"></span>
+            </p>
+            <p 
+              x-show="currentExercise?.lastWeight !== 0"
+              class="text-sm text-blue-400 flex items-center gap-1 mt-1"
+            >
+              <i data-lucide="trending-up" class="w-4 h-4"></i>
+              Прошлый раз: <span x-text="currentExercise?.lastWeight"></span> кг
+            </p>
+          </div>
+        </div>
+
+        <!-- Alternatives Toggle -->
+        <button 
+          @click="showAlternatives = !showAlternatives"
+          class="w-full text-left text-sm text-gray-400 flex items-center gap-2 mb-2"
+        >
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span x-text="showAlternatives ? 'Скрыть альтернативы' : `Альтернативы (${currentExercise?.alts?.length || 0})`"></span>
+        </button>
+        
+        <!-- Alternatives List -->
+        <div x-show="showAlternatives" x-transition class="space-y-2 mb-4">
+          <template x-for="(alt, i) in currentExercise?.alts" :key="i">
+            <button
+              @click="selectedAlt = (selectedAlt === alt ? null : alt); showAlternatives = false"
+              class="w-full text-left p-2 rounded-lg text-sm transition-colors"
+              :class="selectedAlt === alt ? 'bg-blue-500/30 border border-blue-500' : 'bg-gray-700'"
+              x-text="alt"
+            ></button>
+          </template>
+          <button
+            x-show="selectedAlt"
+            @click="selectedAlt = null"
+            class="w-full text-left p-2 rounded-lg text-sm bg-gray-700"
+          >
+            ← Вернуть основное
+          </button>
+        </div>
+      </div>
+
+      <!-- Completed Sets -->
+      <div x-show="currentExerciseSets.length > 0" class="mb-4">
+        <p class="text-sm text-gray-400 mb-2">Записанные подходы:</p>
+        <div class="flex flex-wrap gap-2">
+          <template x-for="(set, i) in currentExerciseSets" :key="i">
+            <div class="bg-green-500/20 border border-green-500/50 rounded-lg px-3 py-2 text-sm">
+              <span class="text-green-400 font-semibold" x-text="set.weight + ' кг'"></span>
+              <span class="text-gray-400"> × </span>
+              <span x-text="set.reps"></span>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <!-- Input Form -->
+      <div class="bg-gray-800 rounded-2xl p-4">
+        <p class="text-center text-gray-400 mb-4">
+          Подход <span x-text="currentExerciseSets.length + 1"></span>
+        </p>
+        
+        <!-- Weight Input -->
+        <div class="mb-6">
+          <p class="text-sm text-gray-400 text-center mb-2">Вес (кг)</p>
+          <div class="flex items-center justify-center gap-4">
+            <button 
+              @click="currentWeight = Math.max(0, currentWeight - 2.5)"
+              class="w-14 h-14 bg-gray-700 rounded-xl flex items-center justify-center active:bg-gray-600"
+            >
+              <i data-lucide="minus" class="w-6 h-6"></i>
+            </button>
+            <div class="w-24 text-center">
+              <p class="text-4xl font-bold" x-text="currentWeight"></p>
+            </div>
+            <button 
+              @click="currentWeight += 2.5"
+              class="w-14 h-14 bg-gray-700 rounded-xl flex items-center justify-center active:bg-gray-600"
+            >
+              <i data-lucide="plus" class="w-6 h-6"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Reps Input -->
+        <div class="mb-6">
+          <p class="text-sm text-gray-400 text-center mb-2">Повторения</p>
+          <div class="flex items-center justify-center gap-4">
+            <button 
+              @click="currentReps = Math.max(1, currentReps - 1)"
+              class="w-14 h-14 bg-gray-700 rounded-xl flex items-center justify-center active:bg-gray-600"
+            >
+              <i data-lucide="minus" class="w-6 h-6"></i>
+            </button>
+            <div class="w-24 text-center">
+              <p class="text-4xl font-bold" x-text="currentReps"></p>
+            </div>
+            <button 
+              @click="currentReps++"
+              class="w-14 h-14 bg-gray-700 rounded-xl flex items-center justify-center active:bg-gray-600"
+            >
+              <i data-lucide="plus" class="w-6 h-6"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Record Button -->
+        <button
+          @click="recordSet()"
+          class="w-full bg-green-500 hover:bg-green-600 rounded-xl py-4 font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+        >
+          <i data-lucide="check" class="w-6 h-6"></i>
+          Записать подход
+        </button>
+      </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="fixed bottom-0 left-0 right-0 bg-gray-800 border-t border-gray-700 p-4">
+      <div class="flex gap-4 max-w-md mx-auto">
+        <button
+          :disabled="currentExerciseIndex === 0"
+          @click="prevExercise()"
+          class="flex-1 bg-gray-700 rounded-xl py-3 font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+        >
+          <i data-lucide="chevron-left" class="w-5 h-5"></i>
+          Назад
+        </button>
+        <button
+          @click="nextExercise()"
+          class="flex-1 bg-blue-500 rounded-xl py-3 font-semibold flex items-center justify-center gap-2"
+        >
+          Далее
+          <i data-lucide="chevron-right" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== СТРАНИЦА: CARDIO ========== -->
+  <div x-show="page === 'cardio'" x-cloak class="min-h-screen p-4">
+    
+    <!-- Header -->
+    <div class="flex items-center gap-3 mb-6">
+      <button @click="page = isCardioOnly ? 'select-workout' : 'workout'" class="p-2 hover:bg-gray-800 rounded-lg">
+        <i data-lucide="chevron-left" class="w-6 h-6"></i>
+      </button>
+      <h1 class="text-xl font-bold" x-text="isCardioOnly ? 'Кардио тренировка' : `Кардио (${currentWorkout?.cardio || 30} мин)`"></h1>
+    </div>
+
+    <!-- HR Zones reminder -->
+    <div class="bg-gradient-to-r from-red-900/30 to-orange-900/30 rounded-xl p-3 mb-4 border border-red-700/30">
+      <p class="text-sm text-gray-300 flex items-center gap-2">
+        <i data-lucide="heart" class="w-4 h-4 text-red-400"></i>
+        Целевой пульс: 
+        <span class="font-bold text-orange-400">
+          <span x-text="profile.fatBurnLow"></span>-<span x-text="profile.fatBurnHigh"></span> уд/мин
+        </span>
+      </p>
+    </div>
+
+    <!-- Cardio Type -->
+    <div class="bg-gray-800 rounded-2xl p-4 mb-4">
+      <p class="text-sm text-gray-400 mb-3">Тип кардио</p>
+      <div class="grid grid-cols-3 gap-3">
+        <template x-for="type in cardioTypes" :key="type.id">
+          <button
+            @click="cardioData.type = type.id"
+            class="p-3 rounded-xl flex flex-col items-center gap-2 transition-colors"
+            :class="cardioData.type === type.id ? 'bg-purple-500' : 'bg-gray-700'"
+          >
+            <div class="w-12 h-12" x-html="getExerciseIcon(type.icon)"></div>
+            <span class="text-sm" x-text="type.name"></span>
+          </button>
+        </template>
+      </div>
+    </div>
+
+    <!-- Duration -->
+    <div class="bg-gray-800 rounded-2xl p-4 mb-4">
+      <p class="text-sm text-gray-400 mb-3">Длительность (минуты)</p>
+      <div class="flex items-center justify-center gap-4">
+        <button 
+          @click="cardioData.duration = Math.max(5, cardioData.duration - 5)"
+          class="w-14 h-14 bg-gray-700 rounded-xl flex items-center justify-center"
+        >
+          <i data-lucide="minus" class="w-6 h-6"></i>
+        </button>
+        <div class="w-24 text-center">
+          <p class="text-4xl font-bold" x-text="cardioData.duration"></p>
+        </div>
+        <button 
+          @click="cardioData.duration += 5"
+          class="w-14 h-14 bg-gray-700 rounded-xl flex items-center justify-center"
+        >
+          <i data-lucide="plus" class="w-6 h-6"></i>
+        </button>
+      </div>
+      
+      <!-- Quick select -->
+      <div class="flex justify-center gap-2 mt-3">
+        <template x-for="min in [20, 30, 45, 60]" :key="min">
+          <button
+            @click="cardioData.duration = min"
+            class="px-4 py-2 rounded-lg text-sm transition-colors"
+            :class="cardioData.duration === min ? 'bg-purple-500' : 'bg-gray-700'"
+            x-text="min"
+          ></button>
+        </template>
+      </div>
+    </div>
+
+    <!-- Podcast -->
+    <div class="bg-gray-800 rounded-2xl p-4 mb-4">
+      <p class="text-sm text-gray-400 mb-2">🎧 Подкаст (опционально)</p>
+      <input
+        type="text"
+        placeholder="NotebookLM: AI архитектура..."
+        x-model="cardioData.podcast"
+        class="w-full bg-gray-700 rounded-xl p-3 outline-none focus:ring-2 focus:ring-purple-500"
+      >
+    </div>
+
+    <button
+      @click="page = 'complete'"
+      class="w-full bg-purple-500 hover:bg-purple-600 rounded-xl py-4 font-bold text-lg active:scale-[0.98] transition-transform"
+      x-text="isCardioOnly ? 'Завершить кардио' : 'Далее →'"
+    ></button>
+  </div>
+
+  <!-- ========== СТРАНИЦА: COMPLETE ========== -->
+  <div x-show="page === 'complete'" x-cloak class="min-h-screen p-4">
+    
+    <!-- Success Header -->
+    <div class="text-center mb-6">
+      <div class="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+        <i data-lucide="award" class="w-10 h-10 text-green-400"></i>
+      </div>
+      <h1 class="text-2xl font-bold mb-2">Отличная работа! 💪</h1>
+      <p class="text-gray-400">Осталось оценить самочувствие</p>
+    </div>
+
+    <!-- Mood Post Workout -->
+    <div class="bg-gray-800 rounded-2xl p-4 mb-4">
+      <p class="text-sm text-gray-400 mb-3">Как себя чувствуешь сейчас?</p>
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-3xl" x-text="getMoodEmoji(moodPost)"></span>
+        <span class="text-4xl font-bold" x-text="moodPost"></span>
+      </div>
+      <input
+        type="range"
+        min="1"
+        max="10"
+        x-model="moodPost"
+        class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-green-500"
+      >
+      <div class="flex justify-between text-xs text-gray-500 mt-1">
+        <span>Плохо</span>
+        <span>Отлично</span>
+      </div>
+    </div>
+
+    <!-- Mood Day -->
+    <div class="bg-gray-800 rounded-2xl p-4 mb-4">
+      <p class="text-sm text-gray-400 mb-3">Общее самочувствие за день</p>
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-3xl" x-text="getMoodEmoji(moodDay)"></span>
+        <span class="text-4xl font-bold" x-text="moodDay"></span>
+      </div>
+      <input
+        type="range"
+        min="1"
+        max="10"
+        x-model="moodDay"
+        class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+      >
+    </div>
+
+    <!-- Notes -->
+    <div class="bg-gray-800 rounded-2xl p-4 mb-6">
+      <p class="text-sm text-gray-400 mb-2">📝 Заметки (опционально)</p>
+      <textarea
+        placeholder="Плечо побаливало, сократил вес на жиме..."
+        x-model="notes"
+        class="w-full bg-gray-700 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px] resize-none"
+      ></textarea>
+    </div>
+
+    <!-- Save Button -->
+    <button
+      @click="saveWorkout()"
+      class="w-full bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl py-4 font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+    >
+      <i data-lucide="check" class="w-6 h-6"></i>
+      Сохранить тренировку
+    </button>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="icons/exercises.js"></script>
+  <script src="js/app.js"></script>
+  
+  <!-- Initialize Lucide Icons -->
+  <script>
+    // Re-init icons when Alpine updates DOM
+    document.addEventListener('alpine:initialized', () => {
+      lucide.createIcons();
+      
+      // Watch for DOM changes
+      const observer = new MutationObserver(() => {
+        lucide.createIcons();
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+    });
+  </script>
+  
+  <!-- Register Service Worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('SW registered:', reg.scope))
+          .catch(err => console.warn('SW registration failed:', err));
+      });
+    }
+  </script>
+</body>
+</html>
