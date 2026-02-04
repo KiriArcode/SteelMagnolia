@@ -182,7 +182,7 @@
     
     <!-- Header -->
     <div class="flex items-center gap-3 mb-6">
-      <button @click="page = 'dashboard'" class="p-2 hover:bg-gray-800 rounded-lg">
+      <button type="button" @click="page = 'dashboard'" class="p-2 hover:bg-gray-800 rounded-lg">
         <i data-lucide="chevron-left" class="w-6 h-6"></i>
       </button>
       <h1 class="text-xl font-bold">Выбери тренировку</h1>
@@ -190,8 +190,9 @@
 
     <!-- Workout Cards -->
     <div class="space-y-3">
-      <template x-for="(workout, key) in workouts" :key="key">
+      <template x-for="[key, workout] in Object.entries(workouts)" :key="key">
         <button
+          type="button"
           @click="selectWorkout(key)"
           class="w-full rounded-2xl p-4 flex items-center gap-4 shadow-lg active:scale-[0.98] transition-transform"
           :class="workout.gradient"
@@ -213,6 +214,7 @@
 
       <!-- Cardio Only -->
       <button
+        type="button"
         @click="page = 'cardio'; isCardioOnly = true"
         class="w-full bg-gradient-to-r from-purple-500 to-pink-600 rounded-2xl p-4 flex items-center gap-4 shadow-lg active:scale-[0.98] transition-transform"
       >
