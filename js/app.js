@@ -1,10 +1,85 @@
 /**
- * GymBro - Main Alpine.js Component
+ * GymBro PWA - Main Application
+ * 
+ * ВАЖНО: Этот файл должен загружаться ПОСЛЕ:
+ * - js/data.js (WORKOUT_TEMPLATES)
+ * - js/storage.js (Storage)
+ * - icons/exercises.js (EXERCISE_ICONS)
  */
+
+// ============================================
+// FALLBACK DATA (если data.js не загрузился)
+// ============================================
+const WORKOUT_TEMPLATES_FALLBACK = {
+  tuesday: {
+    name: 'Upper Body',
+    emoji: '💪',
+    gradient: 'bg-gradient-to-r from-blue-500 to-blue-600',
+    cardio: 30,
+    exercises: [
+      { id: 'lat_pulldown', name: 'Тяга верхнего блока', sets: 3, reps: 12, icon: 'lat_pulldown', lastWeight: 45, alts: ['Подтягивания'] },
+      { id: 'shoulder_press', name: 'Жим от плеч', sets: 3, reps: 12, icon: 'shoulder_press', lastWeight: 10, alts: [] },
+      { id: 'cable_row', name: 'Тяга горизонтального блока', sets: 3, reps: 12, icon: 'cable_row', lastWeight: 40, alts: [] },
+      { id: 'dumbbell_press', name: 'Жим гантелей', sets: 3, reps: 10, icon: 'dumbbell_press', lastWeight: 12, alts: [] },
+      { id: 'bicep_curl', name: 'Подъём на бицепс', sets: 3, reps: 12, icon: 'bicep_curl', lastWeight: 10, alts: [] },
+    ]
+  },
+  thursday: {
+    name: 'Lower Body',
+    emoji: '🦵',
+    gradient: 'bg-gradient-to-r from-green-500 to-green-600',
+    cardio: 20,
+    exercises: [
+      { id: 'leg_press', name: 'Жим ногами', sets: 3, reps: 15, icon: 'leg_press', lastWeight: 100, alts: [] },
+      { id: 'romanian_deadlift', name: 'Румынская тяга', sets: 3, reps: 12, icon: 'romanian_deadlift', lastWeight: 16, alts: [] },
+      { id: 'leg_extension', name: 'Разгибания ног', sets: 3, reps: 15, icon: 'leg_extension', lastWeight: 35, alts: [] },
+      { id: 'leg_curl', name: 'Сгибания ног', sets: 3, reps: 15, icon: 'leg_curl', lastWeight: 30, alts: [] },
+    ]
+  },
+  saturday: {
+    name: 'Full Body + Core',
+    emoji: '🔥',
+    gradient: 'bg-gradient-to-r from-orange-500 to-red-500',
+    cardio: 30,
+    exercises: [
+      { id: 'pull_up', name: 'Подтягивания', sets: 3, reps: 10, icon: 'pull_up', lastWeight: -30, alts: [] },
+      { id: 'squat', name: 'Приседания', sets: 3, reps: 12, icon: 'squat', lastWeight: 40, alts: [] },
+      { id: 'plank', name: 'Планка', sets: 3, reps: '45 сек', icon: 'plank', lastWeight: 0, alts: [] },
+    ]
+  }
+};
+
+// Безопасное получение шаблонов
+function getWorkoutTemplates() {
+  if (typeof WORKOUT_TEMPLATES !== 'undefined' && WORKOUT_TEMPLATES && Object.keys(WORKOUT_TEMPLATES).length > 0) {
+    console.log('✓ WORKOUT_TEMPLATES loaded from data.js');
+    return WORKOUT_TEMPLATES;
+  }
+  console.warn('⚠️ WORKOUT_TEMPLATES not found, using fallback');
+  return WORKOUT_TEMPLATES_FALLBACK;
+}
+
+// Безопасное получение иконок (глобальная функция)
+function getExerciseIconSafe(iconName) {
+  if (typeof EXERCISE_ICONS !== 'undefined' && EXERCISE_ICONS && EXERCISE_ICONS[iconName]) {
+    return EXERCISE_ICONS[iconName];
+  }
+  // Fallback иконка
+  return `<svg viewBox="0 0 64 64" class="w-full h-full">
+    <rect x="8" y="26" width="48" height="12" fill="white" rx="2"/>
+    <rect x="4" y="22" width="8" height="20" fill="white" rx="2"/>
+    <rect x="52" y="22" width="8" height="20" fill="white" rx="2"/>
+  </svg>`;
+}
+
+// ============================================
+// MAIN ALPINE COMPONENT
+// ============================================
 function gymTracker() {
   return {
     // ===== STATE =====
     page: 'dashboard',
+    isReady: false,
     
     // Profile
     profile: {
@@ -24,11 +99,11 @@ function gymTracker() {
       weekTotal: 7,
       cardioMinutes: 245,
       avgMood: 7.8,
-      weekStart: null, // ISO date of Monday (YYYY-MM-DD) for weekly reset
     },
     
-    // Workouts data (fallback if data.js fails to load)
-    workouts: typeof WORKOUT_TEMPLATES !== 'undefined' ? WORKOUT_TEMPLATES : {},
+    // Workouts - будет заполнено в init()
+    workouts: {},
+    workoutList: [], // Массив для итерации
     currentWorkout: null,
     currentExerciseIndex: 0,
     
@@ -60,12 +135,12 @@ function gymTracker() {
     // Recent workouts
     recentWorkouts: [],
     
-    // Workout list for select screen (computed in init, not getter)
-    workoutList: [],
-    
     // ===== COMPUTED =====
     get currentExercise() {
-      return this.currentWorkout?.exercises[this.currentExerciseIndex];
+      if (!this.currentWorkout || !this.currentWorkout.exercises) {
+        return null;
+      }
+      return this.currentWorkout.exercises[this.currentExerciseIndex] || null;
     },
     
     get currentExerciseSets() {
@@ -74,17 +149,31 @@ function gymTracker() {
     
     // ===== INIT =====
     init() {
-      // Build workout list (property, not getter - more reliable)
-      const w = this.workouts || {};
-      this.workoutList = Object.keys(w).map(key => ({ key, workout: w[key] }));
-      if (!this.workoutList.length) {
-        console.warn('GymBro: WORKOUT_TEMPLATES not loaded - check js/data.js');
-      }
+      console.log('🚀 GymBro initializing...');
       
-      // Load data from localStorage
+      // Проверка зависимостей
+      const checks = {
+        'WORKOUT_TEMPLATES': typeof WORKOUT_TEMPLATES !== 'undefined',
+        'EXERCISE_ICONS': typeof EXERCISE_ICONS !== 'undefined',
+        'Storage': typeof Storage !== 'undefined'
+      };
+      console.table(checks);
+      
+      // Загрузка данных тренировок
+      this.workouts = getWorkoutTemplates();
+      
+      // Создаём массив для итерации в шаблоне
+      this.workoutList = Object.entries(this.workouts).map(([key, value]) => ({
+        key,
+        ...value
+      }));
+      
+      console.log('📋 workoutList:', this.workoutList.map(w => w.name));
+      
+      // Загрузка сохранённых данных
       this.loadData();
       
-      // Load profile from localStorage (Storage = our wrapper from storage.js)
+      // Загрузка профиля из localStorage
       if (typeof Storage !== 'undefined' && typeof Storage.getProfile === 'function') {
         const savedProfile = Storage.getProfile();
         if (savedProfile) {
@@ -92,10 +181,11 @@ function gymTracker() {
         }
       }
       
-      // Calculate HR zones based on age
+      // Расчёт пульсовых зон
       this.calculateHRZones();
       
-      console.log('GymBro initialized');
+      this.isReady = true;
+      console.log('✅ GymBro ready!');
     },
     
     // ===== METHODS =====
@@ -126,25 +216,77 @@ function gymTracker() {
       return `Сегодня: ${dayName} — ${plans[today]}`;
     },
     
+    // ========================================
+    // SELECT WORKOUT - ИСПРАВЛЕННАЯ ВЕРСИЯ
+    // ========================================
     selectWorkout(key) {
-      const workout = this.workouts?.[key];
-      if (!workout?.exercises?.length) return;
+      console.log('📌 selectWorkout called with:', key);
       
-      this.currentWorkout = { ...workout, key };
-      this.currentExerciseIndex = 0;
-      this.sets = [];
-      this.selectedAlt = null;
-      this.showAlternatives = false;
+      // Проверка 1: workouts существует
+      if (!this.workouts || Object.keys(this.workouts).length === 0) {
+        console.error('❌ workouts is empty or undefined');
+        alert('Ошибка: данные тренировок не загружены. Обновите страницу.');
+        return;
+      }
       
-      const firstEx = this.currentWorkout.exercises[0];
-      this.currentWeight = firstEx.lastWeight ?? 20;
-      this.currentReps = typeof firstEx.reps === 'number' ? firstEx.reps : 12;
+      // Проверка 2: ключ существует
+      if (!this.workouts[key]) {
+        console.error('❌ Workout not found for key:', key);
+        console.log('Available keys:', Object.keys(this.workouts));
+        alert('Тренировка не найдена: ' + key);
+        return;
+      }
       
-      this.page = 'workout';
+      try {
+        // Создаём копию данных тренировки
+        const workoutData = this.workouts[key];
+        
+        this.currentWorkout = {
+          key: key,
+          name: workoutData.name,
+          emoji: workoutData.emoji,
+          gradient: workoutData.gradient,
+          cardio: workoutData.cardio,
+          exercises: workoutData.exercises.map(ex => ({ ...ex })) // Копируем упражнения
+        };
+        
+        console.log('✓ currentWorkout set:', this.currentWorkout.name);
+        console.log('  exercises:', this.currentWorkout.exercises.length);
+        
+        // Сброс состояния
+        this.currentExerciseIndex = 0;
+        this.sets = [];
+        this.selectedAlt = null;
+        this.showAlternatives = false;
+        
+        // Установка начальных значений
+        const firstEx = this.currentWorkout.exercises[0];
+        if (firstEx) {
+          this.currentWeight = firstEx.lastWeight ?? 20;
+          this.currentReps = typeof firstEx.reps === 'number' ? firstEx.reps : 12;
+          console.log('  first exercise:', firstEx.name);
+          console.log('  weight:', this.currentWeight, 'reps:', this.currentReps);
+        }
+        
+        // Переключение страницы
+        console.log('🔄 Switching to workout page...');
+        this.page = 'workout';
+        console.log('✓ page =', this.page);
+        
+      } catch (error) {
+        console.error('❌ selectWorkout error:', error);
+        alert('Ошибка при выборе тренировки: ' + error.message);
+      }
     },
     
     recordSet() {
-      // Save the set
+      if (!this.currentExercise) {
+        console.error('No current exercise');
+        return;
+      }
+      
+      console.log('📝 Recording set:', this.currentWeight, 'kg ×', this.currentReps);
+      
       this.sets.push({
         exerciseIndex: this.currentExerciseIndex,
         exerciseId: this.currentExercise.id,
@@ -154,25 +296,34 @@ function gymTracker() {
         timestamp: new Date().toISOString(),
       });
       
-      // Check if all sets completed for this exercise
-      const targetSets = this.currentExercise.sets;
+      // Проверка завершения всех сетов
+      const targetSets = this.currentExercise.sets || 3;
       if (this.currentExerciseSets.length >= targetSets) {
+        console.log('✓ All sets complete, moving to next exercise');
         this.nextExercise();
       }
     },
     
     nextExercise() {
-      if (this.currentExerciseIndex < this.currentWorkout.exercises.length - 1) {
+      if (!this.currentWorkout) return;
+      
+      const totalExercises = this.currentWorkout.exercises.length;
+      
+      if (this.currentExerciseIndex < totalExercises - 1) {
         this.currentExerciseIndex++;
         this.selectedAlt = null;
         this.showAlternatives = false;
         
-        // Load next exercise defaults (?? for 0 in planks)
         const nextEx = this.currentExercise;
-        this.currentWeight = nextEx.lastWeight ?? this.currentWeight;
-        this.currentReps = typeof nextEx.reps === 'number' ? nextEx.reps : 12;
+        if (nextEx) {
+          this.currentWeight = nextEx.lastWeight ?? this.currentWeight;
+          this.currentReps = typeof nextEx.reps === 'number' ? nextEx.reps : 12;
+        }
+        
+        console.log('➡️ Next exercise:', this.currentExerciseIndex + 1, '/', totalExercises);
       } else {
-        // All exercises done, go to cardio
+        // Все упражнения выполнены → кардио
+        console.log('🏃 All exercises done, going to cardio');
         this.isCardioOnly = false;
         this.cardioData.duration = this.currentWorkout.cardio || 30;
         this.page = 'cardio';
@@ -186,13 +337,18 @@ function gymTracker() {
         this.showAlternatives = false;
         
         const prevEx = this.currentExercise;
-        this.currentWeight = prevEx.lastWeight ?? this.currentWeight;
-        this.currentReps = typeof prevEx.reps === 'number' ? prevEx.reps : 12;
+        if (prevEx) {
+          this.currentWeight = prevEx.lastWeight ?? this.currentWeight;
+          this.currentReps = typeof prevEx.reps === 'number' ? prevEx.reps : 12;
+        }
+        
+        console.log('⬅️ Previous exercise:', this.currentExerciseIndex + 1);
       }
     },
     
     saveWorkout() {
-      // Create workout record
+      console.log('💾 Saving workout...');
+      
       const workout = {
         id: Date.now(),
         date: new Date().toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }),
@@ -204,16 +360,18 @@ function gymTracker() {
         moodPost: this.moodPost,
         moodDay: this.moodDay,
         notes: this.notes,
-        mood: this.moodPost, // for display
+        mood: this.moodPost,
       };
       
-      // Save to storage
-      Storage.saveWorkout(workout);
+      // Сохранение
+      if (typeof Storage !== 'undefined' && Storage.saveWorkout) {
+        Storage.saveWorkout(workout);
+        this.updateStats(workout);
+      } else {
+        console.warn('Storage not available, workout not saved');
+      }
       
-      // Update stats
-      this.updateStats(workout);
-      
-      // Reset state
+      // Сброс состояния
       this.currentWorkout = null;
       this.currentExerciseIndex = 0;
       this.sets = [];
@@ -222,108 +380,62 @@ function gymTracker() {
       this.notes = '';
       this.isCardioOnly = false;
       
-      // Reload recent workouts
+      // Перезагрузка данных
       this.loadData();
       
-      // Go to dashboard
+      // Возврат на главную
       this.page = 'dashboard';
+      
+      console.log('✅ Workout saved!');
     },
     
     updateStats(workout) {
-      const monday = this.getWeekStart();
-      this.stats.weekStart = monday;
       this.stats.weekCompleted = Math.min(7, this.stats.weekCompleted + 1);
       
-      // Update cardio minutes
       if (workout.cardio?.duration) {
         this.stats.cardioMinutes += workout.cardio.duration;
       }
       
-      // Update average mood
-      const allWorkouts = Storage.getWorkouts();
-      if (allWorkouts.length > 0) {
-        const totalMood = allWorkouts.reduce((sum, w) => sum + (w.moodPost || 7), 0);
-        this.stats.avgMood = totalMood / allWorkouts.length;
+      // Обновление среднего настроения
+      if (typeof Storage !== 'undefined' && Storage.getWorkouts) {
+        const allWorkouts = Storage.getWorkouts();
+        if (allWorkouts.length > 0) {
+          const totalMood = allWorkouts.reduce((sum, w) => sum + (w.moodPost || 7), 0);
+          this.stats.avgMood = totalMood / allWorkouts.length;
+        }
       }
       
-      // Save stats
-      Storage.saveStats(this.stats);
-    },
-    
-    getWeekStart() {
-      const d = new Date();
-      const day = d.getDay();
-      const diff = day === 0 ? -6 : 1 - day;
-      const monday = new Date(d.getTime() + diff * 86400000);
-      const y = monday.getFullYear();
-      const m = String(monday.getMonth() + 1).padStart(2, '0');
-      const dayNum = String(monday.getDate()).padStart(2, '0');
-      return `${y}-${m}-${dayNum}`;
+      if (typeof Storage !== 'undefined' && Storage.saveStats) {
+        Storage.saveStats(this.stats);
+      }
     },
     
     loadData() {
-      // Load stats
-      const savedStats = Storage.getStats();
+      console.log('📂 Loading data...');
+      
+      if (typeof Storage === 'undefined') {
+        console.warn('Storage not available');
+        return;
+      }
+      
+      // Загрузка статистики
+      const savedStats = Storage.getStats ? Storage.getStats() : null;
       if (savedStats) {
         this.stats = { ...this.stats, ...savedStats };
       }
       
-      // Reset week stats if new week started
-      const currentWeekStart = this.getWeekStart();
-      if (this.stats.weekStart && this.stats.weekStart !== currentWeekStart) {
-        this.stats.weekCompleted = 0;
-        this.stats.cardioMinutes = 0;
-        this.stats.weekStart = currentWeekStart;
-        this.recalculateWeekStats();
-        Storage.saveStats(this.stats);
-      }
+      // Загрузка последних тренировок
+      const workouts = Storage.getWorkouts ? Storage.getWorkouts() : [];
+      this.recentWorkouts = workouts.slice(0, 5);
       
-      // Load recent workouts
-      this.recentWorkouts = Storage.getWorkouts().slice(0, 5);
-      
-      // Load last weights for exercises
-      this.loadLastWeights();
-    },
-    
-    recalculateWeekStats() {
-      const start = new Date(this.stats.weekStart + 'T00:00:00');
-      const end = new Date(start.getTime() + 7 * 86400000);
-      const workouts = Storage.getWorkouts();
-      let completed = 0;
-      let cardioMins = 0;
-      for (const w of workouts) {
-        const wDate = new Date(w.dateISO || w.date);
-        if (wDate >= start && wDate < end) {
-          completed++;
-          cardioMins += w.cardio?.duration || 0;
-        }
-      }
-      this.stats.weekCompleted = Math.min(7, completed);
-      this.stats.cardioMinutes = cardioMins;
-    },
-    
-    loadLastWeights() {
-      const workouts = Storage.getWorkouts();
-      
-      // Update lastWeight for each exercise based on history
-      Object.keys(this.workouts).forEach(workoutKey => {
-        this.workouts[workoutKey].exercises.forEach(exercise => {
-          // Find last set for this exercise
-          for (const workout of workouts) {
-            const lastSet = workout.sets?.find(s => s.exerciseId === exercise.id);
-            if (lastSet) {
-              exercise.lastWeight = lastSet.weight;
-              break;
-            }
-          }
-        });
-      });
+      console.log('  recent workouts:', this.recentWorkouts.length);
     },
     
     // ===== HELPERS =====
     getMoodEmoji(mood) {
-      if (mood >= 8) return '😊';
-      if (mood >= 5) return '😐';
+      const m = parseInt(mood) || 5;
+      if (m >= 8) return '😊';
+      if (m >= 5) return '😐';
       return '😔';
     },
     
@@ -338,7 +450,11 @@ function gymTracker() {
     },
     
     getExerciseIcon(iconName) {
-      return EXERCISE_ICONS[iconName] || EXERCISE_ICONS.dumbbell;
+      return getExerciseIconSafe(iconName);
     },
   };
 }
+
+// Экспорт для отладки
+window.gymTracker = gymTracker;
+console.log('📦 app.js loaded');

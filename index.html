@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#111827">
+  <!-- Base URL для GitHub Pages. Для локальной разработки можно закомментировать -->
+  <base href="/GymbroPWA/">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   
@@ -189,24 +191,29 @@
       <h1 class="text-xl font-bold">Выбери тренировку</h1>
     </div>
 
+    <!-- Debug info (убрать после отладки) -->
+    <div class="text-xs text-gray-500 mb-4">
+      workoutList length: <span x-text="workoutList.length"></span>
+    </div>
+
     <!-- Workout Cards -->
     <div class="space-y-3">
-      <template x-for="item in workoutList" :key="item.key">
+      <template x-for="workout in workoutList" :key="workout.key">
         <button
           type="button"
-          @click="selectWorkout(item.key)"
+          @click="selectWorkout(workout.key)"
           class="w-full rounded-2xl p-4 flex items-center gap-4 shadow-lg active:scale-[0.98] transition-transform"
-          :class="item.workout.gradient"
+          :class="workout.gradient"
         >
           <div class="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center p-2">
-            <div x-html="getExerciseIcon(item.workout.exercises[0]?.icon || 'dumbbell')"></div>
+            <div x-html="getExerciseIcon(workout.exercises[0]?.icon || 'dumbbell')"></div>
           </div>
           <div class="flex-1 text-left">
-            <p class="text-2xl mb-1" x-text="item.workout.emoji"></p>
-            <p class="font-bold text-lg" x-text="item.workout.name"></p>
+            <p class="text-2xl mb-1" x-text="workout.emoji"></p>
+            <p class="font-bold text-lg" x-text="workout.name"></p>
             <p class="text-white/70 text-sm">
-              <span x-text="item.workout.exercises.length"></span> упражнений + 
-              <span x-text="item.workout.cardio"></span> мин кардио
+              <span x-text="workout.exercises.length"></span> упражнений + 
+              <span x-text="workout.cardio"></span> мин кардио
             </p>
           </div>
           <i data-lucide="chevron-right" class="w-6 h-6"></i>
@@ -588,19 +595,18 @@
     </button>
   </div>
 
-  <!-- Scripts -->
-  <script src="js/data.js"></script>
-  <script src="js/storage.js"></script>
-  <script src="icons/exercises.js"></script>
-  <script src="js/app.js"></script>
+  <!-- Scripts - ПОРЯДОК ВАЖЕН! -->
+  <script src="./js/data.js"></script>
+  <script src="./js/storage.js"></script>
+  <script src="./icons/exercises.js"></script>
+  <script src="./js/app.js"></script>
   
-  <!-- Initialize Lucide Icons -->
+  <!-- Lucide Icons init -->
   <script>
-    // Re-init icons when Alpine updates DOM
     document.addEventListener('alpine:initialized', () => {
+      console.log('Alpine initialized, creating icons...');
       lucide.createIcons();
       
-      // Watch for DOM changes
       const observer = new MutationObserver(() => {
         lucide.createIcons();
       });
