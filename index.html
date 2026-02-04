@@ -238,7 +238,7 @@
       <template x-for="workout in workoutList" :key="workout.key">
         <button
           type="button"
-          @click="selectWorkout(workout.key)"
+          @click="planWorkoutKey = workout.key; page = 'workout-plan'"
           class="w-full rounded-2xl p-4 flex items-center gap-4 shadow-lg active:scale-[0.98] transition-transform"
           :class="workout.gradient"
         >
@@ -274,6 +274,47 @@
         <i data-lucide="chevron-right" class="w-6 h-6"></i>
       </button>
     </div>
+  </div>
+  </template>
+
+  <!-- ========== СТРАНИЦА: ПЛАН ТРЕНИРОВКИ ========== -->
+  <template x-if="page === 'workout-plan'">
+  <div class="min-h-screen p-4 pb-24">
+    <div class="flex items-center gap-3 mb-6">
+      <button type="button" @click="page = 'select-workout'; planWorkoutKey = null" class="p-2 hover:bg-gray-800 rounded-lg">
+        <i data-lucide="chevron-left" class="w-6 h-6"></i>
+      </button>
+      <h1 class="text-xl font-bold" x-text="workouts[planWorkoutKey]?.name || 'План тренировки'"></h1>
+    </div>
+    <template x-if="planWorkoutKey">
+      <div>
+        <div class="space-y-2 mb-6" :data-ver="inactiveVersion">
+          <template x-for="(ex, i) in (workouts[planWorkoutKey]?.exercises || [])" :key="ex.id + '_' + (inactiveVersion || 0)">
+            <div 
+              class="flex items-center gap-3 p-3 rounded-xl transition-opacity"
+              :class="isExerciseInactive(planWorkoutKey, ex.id) ? 'bg-gray-800 opacity-60' : 'bg-gray-800'"
+            >
+              <div class="w-10 h-10 rounded-lg bg-gray-700 flex items-center justify-center shrink-0" x-html="getExerciseIcon(ex.icon)"></div>
+              <div class="flex-1 min-w-0">
+                <p class="font-medium" x-text="ex.name"></p>
+                <p class="text-xs text-gray-400" x-text="(ex.sets || 3) + '×' + (ex.reps || 12)"></p>
+              </div>
+              <label class="flex items-center gap-2 shrink-0 cursor-pointer">
+                <input type="checkbox" :checked="isExerciseInactive(planWorkoutKey, ex.id)" @change="toggleExerciseInactive(planWorkoutKey, ex.id)" class="rounded">
+                <span class="text-xs text-gray-500">Нет в зале</span>
+              </label>
+            </div>
+          </template>
+        </div>
+        <button
+          type="button"
+          @click="startWorkoutFromPlan()"
+          class="w-full py-4 rounded-xl bg-blue-500 hover:bg-blue-600 font-bold text-lg"
+        >
+          Начать тренировку
+        </button>
+      </div>
+    </template>
   </div>
   </template>
 
@@ -319,7 +360,18 @@
             <div x-html="getExerciseIcon(currentExercise?.icon)"></div>
           </div>
           <div class="flex-1">
-            <h2 class="font-bold text-lg" x-text="selectedAlt || currentExercise?.name"></h2>
+            <div class="flex items-center gap-2">
+              <h2 class="font-bold text-lg" x-text="(selectedAlt?.name || selectedAlt) || currentExercise?.name"></h2>
+              <button
+                type="button"
+                x-show="getCurrentVideoUrl()"
+                @click="openVideoModal()"
+                class="p-1.5 rounded-lg bg-blue-500/30 hover:bg-blue-500/50 text-blue-400"
+                title="Смотреть видео"
+              >
+                <i data-lucide="play" class="w-4 h-4"></i>
+              </button>
+            </div>
             <p class="text-gray-400">
               <span x-text="currentExercise?.sets"></span>×<span x-text="currentExercise?.reps"></span>
             </p>
@@ -351,8 +403,10 @@
               @click="selectedAlt = (selectedAlt === alt ? null : alt); showAlternatives = false"
               class="w-full text-left p-2 rounded-lg text-sm transition-colors"
               :class="selectedAlt === alt ? 'bg-blue-500/30 border border-blue-500' : 'bg-gray-700'"
-              x-text="alt"
-            ></button>
+            >
+              <span x-text="alt.name || alt"></span>
+              <span x-show="alt.forWhat" class="text-gray-500 block text-xs mt-0.5" x-text="'→ ' + alt.forWhat"></span>
+            </button>
           </template>
           <button
             type="button"
@@ -467,6 +521,27 @@
         </button>
       </div>
     </div>
+    
+    <!-- Video Modal -->
+    <template x-if="videoModalOpen">
+      <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" @click.self="closeVideoModal()">
+        <div class="relative w-full max-w-2xl aspect-video bg-black rounded-xl overflow-hidden">
+          <iframe 
+            :src="videoModalUrl" 
+            class="w-full h-full"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+          ></iframe>
+          <button
+            type="button"
+            @click="closeVideoModal()"
+            class="absolute top-2 right-2 p-2 rounded-full bg-black/60 hover:bg-black/80"
+          >
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+    </template>
   </div>
   </template>
 
@@ -750,14 +825,21 @@
     
     <template x-if="managingWorkoutKey && editingExerciseIndex === -1">
       <div>
-        <div class="space-y-2 mb-4">
-          <template x-for="(ex, i) in (workouts[managingWorkoutKey]?.exercises || [])" :key="i">
-            <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-800">
-              <div class="w-10 h-10 rounded-lg bg-gray-700 flex items-center justify-center" x-html="getExerciseIcon(ex.icon)"></div>
-              <div class="flex-1">
+        <div class="space-y-2 mb-4" :data-ver="inactiveVersion">
+          <template x-for="(ex, i) in (workouts[managingWorkoutKey]?.exercises || [])" :key="ex.id + '_' + (inactiveVersion || 0)">
+            <div 
+              class="flex items-center gap-3 p-3 rounded-xl transition-opacity"
+              :class="isExerciseInactive(managingWorkoutKey, ex.id) ? 'bg-gray-800 opacity-60' : 'bg-gray-800'"
+            >
+              <div class="w-10 h-10 rounded-lg bg-gray-700 flex items-center justify-center shrink-0" x-html="getExerciseIcon(ex.icon)"></div>
+              <div class="flex-1 min-w-0">
                 <p class="font-medium" x-text="ex.name"></p>
                 <p class="text-xs text-gray-400" x-text="(ex.sets || 3) + '×' + (ex.reps || 12)"></p>
               </div>
+              <label class="flex items-center gap-1 shrink-0 cursor-pointer" title="Нет в моем зале">
+                <input type="checkbox" :checked="isExerciseInactive(managingWorkoutKey, ex.id)" @change="toggleExerciseInactive(managingWorkoutKey, ex.id)" class="rounded">
+                <i data-lucide="eye-off" class="w-4 h-4 text-gray-500"></i>
+              </label>
               <button type="button" @click="startEditExercise(i)" class="p-2 hover:bg-gray-600 rounded-lg"><i data-lucide="pencil" class="w-4 h-4"></i></button>
               <button type="button" @click="deleteExerciseFromTemplate(i)" class="p-2 hover:bg-red-500/30 rounded-lg text-red-400"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
             </div>
@@ -789,8 +871,22 @@
             </div>
           </div>
           <div>
-            <label class="text-sm text-gray-400">Альтернативы (через запятую)</label>
-            <input type="text" x-model="exerciseForm.altsStr" class="w-full bg-gray-700 rounded-lg p-3 mt-1" placeholder="Подтягивания, Тяга в гравитроне">
+            <label class="text-sm text-gray-400">Видео (YouTube URL)</label>
+            <input type="url" x-model="exerciseForm.videoUrl" class="w-full bg-gray-700 rounded-lg p-3 mt-1" placeholder="https://youtube.com/watch?v=...">
+          </div>
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <label class="text-sm text-gray-400">Альтернативы</label>
+              <button type="button" @click="addAltExercise()" class="text-blue-400 text-sm">+ Добавить</button>
+            </div>
+            <template x-for="(alt, ai) in (exerciseForm.alts || [])" :key="ai">
+              <div class="flex gap-2 mb-2 p-2 rounded-lg bg-gray-700/50">
+                <input type="text" x-model="alt.name" class="flex-1 bg-gray-700 rounded px-2 py-1 text-sm" placeholder="Название">
+                <input type="text" x-model="alt.forWhat" class="flex-1 bg-gray-700 rounded px-2 py-1 text-sm" placeholder="Для чего замена">
+                <input type="url" x-model="alt.videoUrl" class="flex-1 bg-gray-700 rounded px-2 py-1 text-sm" placeholder="YouTube">
+                <button type="button" @click="removeAltExercise(ai)" class="p-1 text-red-400 shrink-0"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+              </div>
+            </template>
           </div>
           <div>
             <label class="text-sm text-gray-400">Иконка</label>

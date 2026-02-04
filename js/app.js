@@ -142,10 +142,18 @@ function gymTracker() {
     // Manage exercises (templates)
     managingWorkoutKey: null,
     editingExerciseIndex: -1,
-    exerciseForm: { name: '', sets: 3, reps: 12, icon: 'dumbbell', alts: [], altsStr: '' },
+    exerciseForm: { name: '', sets: 3, reps: 12, icon: 'dumbbell', videoUrl: '', alts: [] },
     
     // Rest timer
     restTimer: { secondsLeft: 0, type: 'set', intervalId: null },
+    
+    // Plan workout (экран перед стартом)
+    planWorkoutKey: null,
+    inactiveVersion: 0,
+    
+    // Video modal
+    videoModalOpen: false,
+    videoModalUrl: '',
     
     // ===== COMPUTED =====
     get currentExercise() {
@@ -269,10 +277,14 @@ function gymTracker() {
       }
       
       try {
-        // Глубокое копирование (DATA_FLOW: JSON.parse/stringify)
+        const inactive = (typeof Storage !== 'undefined' && Storage.getInactive) ? Storage.getInactive() : {};
+        const inactiveIds = inactive[key] || [];
+        let exercises = (this.workouts[key].exercises || []).filter(ex => !inactiveIds.includes(ex.id));
+        if (exercises.length === 0) exercises = this.workouts[key].exercises || [];
         this.currentWorkout = JSON.parse(JSON.stringify({
           ...this.workouts[key],
-          key: key
+          key: key,
+          exercises
         }));
         
         console.log('✓ currentWorkout set:', this.currentWorkout.name);
@@ -316,7 +328,7 @@ function gymTracker() {
       this.sets.push({
         exerciseIndex: this.currentExerciseIndex,
         exerciseId: this.currentExercise.id,
-        exerciseName: this.selectedAlt || this.currentExercise.name,
+        exerciseName: (this.selectedAlt?.name || this.selectedAlt) || this.currentExercise.name,
         weight: this.currentWeight,
         reps: this.currentReps,
         timestamp: new Date().toISOString(),
@@ -706,6 +718,51 @@ function gymTracker() {
       return getExerciseIconSafe(iconName);
     },
     
+    isExerciseInactive(workoutKey, exerciseId) {
+      const inactive = (typeof Storage !== 'undefined' && Storage.getInactive) ? Storage.getInactive() : {};
+      return (inactive[workoutKey] || []).includes(exerciseId);
+    },
+    
+    toggleExerciseInactive(workoutKey, exerciseId) {
+      if (typeof Storage !== 'undefined' && Storage.toggleInactive) {
+        Storage.toggleInactive(workoutKey, exerciseId);
+        this.inactiveVersion = (this.inactiveVersion || 0) + 1;
+      }
+    },
+    
+    startWorkoutFromPlan() {
+      if (this.planWorkoutKey) {
+        this.selectWorkout(this.planWorkoutKey);
+      }
+    },
+    
+    getVideoEmbedUrl(url) {
+      if (!url || typeof url !== 'string') return '';
+      const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+      return m ? 'https://www.youtube.com/embed/' + m[1] : '';
+    },
+    
+    getCurrentVideoUrl() {
+      const alt = this.selectedAlt;
+      if (alt?.videoUrl) return alt.videoUrl;
+      return this.currentExercise?.videoUrl || '';
+    },
+    
+    openVideoModal() {
+      const url = this.getCurrentVideoUrl();
+      if (!url) return;
+      const embed = this.getVideoEmbedUrl(url);
+      if (embed) {
+        this.videoModalUrl = embed;
+        this.videoModalOpen = true;
+      }
+    },
+    
+    closeVideoModal() {
+      this.videoModalOpen = false;
+      this.videoModalUrl = '';
+    },
+    
     deleteWorkout(id) {
       if (!confirm('Удалить эту тренировку?')) return;
       if (typeof Storage !== 'undefined' && Storage.deleteWorkout) {
@@ -740,31 +797,39 @@ function gymTracker() {
     },
     
     startAddExercise() {
-      this.exerciseForm = { name: '', sets: 3, reps: 12, icon: 'dumbbell', alts: [], altsStr: '' };
+      this.exerciseForm = { name: '', sets: 3, reps: 12, icon: 'dumbbell', videoUrl: '', alts: [] };
       this.editingExerciseIndex = -2;
+    },
+    
+    addAltExercise() {
+      this.exerciseForm.alts = this.exerciseForm.alts || [];
+      this.exerciseForm.alts.push({ name: '', forWhat: '', videoUrl: '' });
+    },
+    
+    removeAltExercise(i) {
+      this.exerciseForm.alts.splice(i, 1);
     },
     
     startEditExercise(index) {
       const ex = this.workouts[this.managingWorkoutKey]?.exercises?.[index];
       if (!ex) return;
-      const alts = Array.isArray(ex.alts) ? ex.alts : [];
+      const alts = Array.isArray(ex.alts) ? ex.alts.map(a => typeof a === 'string' ? { name: a, forWhat: '', videoUrl: '' } : { name: a.name || '', forWhat: a.forWhat || '', videoUrl: a.videoUrl || '' }) : [];
       this.exerciseForm = {
         name: ex.name,
         sets: ex.sets ?? 3,
         reps: ex.reps ?? 12,
         icon: ex.icon || 'dumbbell',
+        videoUrl: ex.videoUrl || '',
         alts,
-        altsStr: alts.join(', '),
       };
       this.editingExerciseIndex = index;
     },
     
     saveExercise() {
       if (!this.managingWorkoutKey || !this.workouts[this.managingWorkoutKey]) return;
-      const alts = (this.exerciseForm.altsStr || '')
-        .split(',')
-        .map(s => s.trim())
-        .filter(Boolean);
+      const alts = (this.exerciseForm.alts || [])
+        .map(a => ({ name: (a.name || '').trim(), forWhat: (a.forWhat || '').trim(), videoUrl: (a.videoUrl || '').trim() }))
+        .filter(a => a.name);
       const ex = {
         id: this.editingExerciseIndex >= 0
           ? this.workouts[this.managingWorkoutKey].exercises[this.editingExerciseIndex].id
@@ -773,6 +838,7 @@ function gymTracker() {
         sets: this.exerciseForm.sets || 3,
         reps: this.exerciseForm.reps || 12,
         icon: this.exerciseForm.icon || 'dumbbell',
+        videoUrl: (this.exerciseForm.videoUrl || '').trim(),
         lastWeight: this.editingExerciseIndex >= 0
           ? (this.workouts[this.managingWorkoutKey].exercises[this.editingExerciseIndex].lastWeight ?? 20)
           : 20,

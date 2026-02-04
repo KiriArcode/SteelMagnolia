@@ -8,6 +8,7 @@ const Storage = {
     PROFILE: 'gym_profile',
     SESSION: 'gym_session',
     TEMPLATES: 'gym_templates',
+    INACTIVE: 'gym_inactive',
   },
   
   // ===== WORKOUTS =====
@@ -167,15 +168,40 @@ const Storage = {
   },
   
   // ===== TEMPLATES (шаблоны тренировок) =====
+  _normalizeAlts(alts) {
+    if (!Array.isArray(alts)) return [];
+    return alts.map(a =>
+      typeof a === 'string' ? { name: a, forWhat: '', videoUrl: '' } : { name: a.name || '', forWhat: a.forWhat || '', videoUrl: a.videoUrl || '' }
+    );
+  },
+  _normalizeExercise(ex) {
+    if (!ex) return ex;
+    const e = { ...ex };
+    e.videoUrl = e.videoUrl || '';
+    e.alts = this._normalizeAlts(e.alts);
+    return e;
+  },
+  _normalizeTemplates(templates) {
+    const out = {};
+    for (const [k, v] of Object.entries(templates || {})) {
+      if (v && v.exercises) {
+        out[k] = { ...v, exercises: (v.exercises || []).map(ex => this._normalizeExercise(ex)) };
+      } else {
+        out[k] = v;
+      }
+    }
+    return out;
+  },
   getTemplates() {
     try {
       const data = localStorage.getItem(this.KEYS.TEMPLATES);
       const custom = data ? JSON.parse(data) : null;
       const base = typeof WORKOUT_TEMPLATES !== 'undefined' ? WORKOUT_TEMPLATES : {};
-      return custom && Object.keys(custom).length > 0 ? { ...base, ...custom } : base;
+      const merged = custom && Object.keys(custom).length > 0 ? { ...base, ...custom } : base;
+      return this._normalizeTemplates(merged);
     } catch (e) {
       console.error('Error reading templates:', e);
-      return typeof WORKOUT_TEMPLATES !== 'undefined' ? WORKOUT_TEMPLATES : {};
+      return this._normalizeTemplates(typeof WORKOUT_TEMPLATES !== 'undefined' ? WORKOUT_TEMPLATES : {});
     }
   },
   
@@ -189,6 +215,40 @@ const Storage = {
     }
   },
   
+  // ===== INACTIVE EXERCISES (нет в моем зале) =====
+  getInactive() {
+    try {
+      const data = localStorage.getItem(this.KEYS.INACTIVE);
+      return data ? JSON.parse(data) : {};
+    } catch (e) {
+      console.error('Error reading inactive:', e);
+      return {};
+    }
+  },
+  
+  saveInactive(data) {
+    try {
+      localStorage.setItem(this.KEYS.INACTIVE, JSON.stringify(data));
+      return true;
+    } catch (e) {
+      console.error('Error saving inactive:', e);
+      return false;
+    }
+  },
+  
+  toggleInactive(workoutKey, exerciseId) {
+    const data = this.getInactive();
+    const arr = data[workoutKey] || [];
+    const idx = arr.indexOf(exerciseId);
+    if (idx === -1) {
+      arr.push(exerciseId);
+    } else {
+      arr.splice(idx, 1);
+    }
+    data[workoutKey] = arr;
+    return this.saveInactive(data);
+  },
+  
   // ===== CLEAR =====
   clearAll() {
     localStorage.removeItem(this.KEYS.WORKOUTS);
@@ -196,5 +256,6 @@ const Storage = {
     localStorage.removeItem(this.KEYS.PROFILE);
     localStorage.removeItem(this.KEYS.SESSION);
     localStorage.removeItem(this.KEYS.TEMPLATES);
+    localStorage.removeItem(this.KEYS.INACTIVE);
   }
 };
