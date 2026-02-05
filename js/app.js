@@ -84,7 +84,7 @@ function gymTracker() {
     // Profile
     profile: {
       name: 'Кристина',
-      age: 36,
+      age: 34,
       maxHR: 184,
       fatBurnLow: 110,
       fatBurnHigh: 138,
@@ -243,11 +243,18 @@ function gymTracker() {
       // Расчёт пульсовых зон
       this.calculateHRZones();
       
+      // Автоматическое обновление дня цикла
+      this.updateCycleDayAutomatically();
+      
       // Очистка сессии при выходе из тренировки и обновление иконок
       if (this.$watch) {
         this.$watch('page', (value) => {
           if ((value === 'dashboard' || value === 'select-workout') && typeof Storage !== 'undefined' && Storage.clearSession) {
             Storage.clearSession();
+          }
+          // Автоматическое обновление дня цикла при открытии dashboard
+          if (value === 'dashboard') {
+            this.updateCycleDayAutomatically();
           }
           // Обновление иконок Lucide при смене страницы
           if (typeof lucide !== 'undefined') {
@@ -1051,6 +1058,37 @@ function gymTracker() {
       }
     },
     
+    updateCycleDayAutomatically() {
+      if (!this.profile.lastPeriodStart) return;
+      
+      const lastPeriod = new Date(this.profile.lastPeriodStart);
+      const today = new Date();
+      const cycleLength = this.profile.cycleLength || 28;
+      
+      // Вычисляем разницу в днях
+      const diffTime = today - lastPeriod;
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      
+      // Вычисляем день цикла
+      let cycleDay = (diffDays % cycleLength) + 1;
+      
+      // Если прошло больше одного цикла с момента последнего обновления, предлагаем отметить новый цикл
+      if (diffDays >= cycleLength) {
+        // Автоматически переходим на новый цикл
+        const cyclesPassed = Math.floor(diffDays / cycleLength);
+        cycleDay = (diffDays % cycleLength) + 1;
+        // Обновляем lastPeriodStart на начало текущего цикла
+        const newPeriodStart = new Date(lastPeriod);
+        newPeriodStart.setDate(newPeriodStart.getDate() + cyclesPassed * cycleLength);
+        this.profile.lastPeriodStart = newPeriodStart.toISOString();
+      }
+      
+      this.profile.cycleDay = cycleDay;
+      if (typeof Storage !== 'undefined' && Storage.saveProfile) {
+        Storage.saveProfile(this.profile);
+      }
+    },
+    
     setPeriodStart(date) {
       this.profile.lastPeriodStart = date;
       this.profile.cycleDay = 1;
@@ -1255,6 +1293,14 @@ function gymTracker() {
       const change = latest - previous;
       const percent = (change / previous) * 100;
       return { change, percent, isPositive: change < 0 }; // Для обхватов меньше = лучше
+    },
+    
+    deleteMeasurement(id) {
+      if (!confirm('Удалить это измерение?')) return;
+      if (typeof Storage !== 'undefined' && Storage.deleteMeasurement) {
+        Storage.deleteMeasurement(id);
+        this.measurements = this.measurements.filter(m => m.id !== id);
+      }
     },
     
     // F-305: Выбор цели

@@ -303,6 +303,17 @@ const Storage = {
     }
   },
   
+  deleteMeasurement(id) {
+    try {
+      const measurements = this.getMeasurements().filter(m => m.id !== id);
+      localStorage.setItem(this.KEYS.MEASUREMENTS, JSON.stringify(measurements));
+      return true;
+    } catch (e) {
+      console.error('Error deleting measurement:', e);
+      return false;
+    }
+  },
+  
   // ===== ACHIEVEMENTS =====
   getAchievements() {
     try {

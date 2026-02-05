@@ -1130,7 +1130,17 @@
               <p class="font-semibold" x-text="m.dateStr"></p>
               <p class="text-xs text-gray-400" x-text="new Date(m.date).toLocaleDateString('ru-RU', { weekday: 'long' })"></p>
             </div>
-            <img x-show="m.photo" :src="m.photo" class="w-16 h-16 rounded-lg object-cover" />
+            <div class="flex items-center gap-2">
+              <img x-show="m.photo" :src="m.photo" class="w-16 h-16 rounded-lg object-cover" />
+              <button
+                type="button"
+                @click="deleteMeasurement(m.id)"
+                class="p-2 hover:bg-red-500/30 rounded-lg text-red-400 transition-colors"
+                title="Удалить"
+              >
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </div>
           </div>
           <div class="grid grid-cols-3 gap-2 text-sm">
             <div>
@@ -1396,6 +1406,36 @@
     </div>
 
     <div class="space-y-4">
+      <!-- Текущая фаза цикла -->
+      <div x-show="profile.cycleDay" class="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl p-4 border border-purple-500/30">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="text-3xl" x-text="getCyclePhase().emoji"></span>
+          <div class="flex-1">
+            <p class="font-bold text-lg" x-text="getCyclePhase().name"></p>
+            <p class="text-sm text-gray-300">День <span x-text="profile.cycleDay"></span> из <span x-text="profile.cycleLength || 28"></span></p>
+          </div>
+        </div>
+        <p class="text-sm text-gray-300 mb-3" x-text="getCyclePhase().recommendation"></p>
+        <!-- Прогресс-бар цикла -->
+        <div class="relative h-2 bg-[#1c1c26] rounded-full overflow-hidden">
+          <div 
+            class="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-300"
+            :style="`width: ${((profile.cycleDay || 1) / (profile.cycleLength || 28)) * 100}%`"
+          ></div>
+        </div>
+      </div>
+
+      <!-- Информация о последнем цикле -->
+      <div x-show="profile.lastPeriodStart" class="bg-[#13131a] rounded-2xl p-4 border border-white/5">
+        <p class="text-sm text-gray-400 mb-1">Последнее начало цикла</p>
+        <p class="font-semibold" x-text="new Date(profile.lastPeriodStart).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })"></p>
+        <p x-show="profile.lastPeriodStart" class="text-xs text-gray-500 mt-2">
+          Следующее ожидаемое начало: 
+          <span x-text="new Date(new Date(profile.lastPeriodStart).getTime() + (profile.cycleLength || 28) * 24 * 60 * 60 * 1000).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })"></span>
+        </p>
+      </div>
+
+      <!-- Настройки -->
       <div>
         <label class="text-sm text-gray-400 mb-2 block">День цикла</label>
         <input 
@@ -1406,6 +1446,7 @@
           @change="updateCycleDay(profile.cycleDay)"
           class="w-full bg-[#252532] rounded-xl p-3 border border-white/5"
         />
+        <p class="text-xs text-gray-500 mt-1">Автоматически обновляется на основе даты начала цикла</p>
       </div>
       <div>
         <label class="text-sm text-gray-400 mb-2 block">Длина цикла (дней)</label>
@@ -1414,21 +1455,17 @@
           min="21"
           max="35"
           x-model="profile.cycleLength"
-          @change="Storage.saveProfile(profile)"
+          @change="Storage.saveProfile(profile); updateCycleDayAutomatically()"
           class="w-full bg-[#252532] rounded-xl p-3 border border-white/5"
         />
       </div>
       <button
         type="button"
         @click="setPeriodStart(new Date().toISOString())"
-        class="w-full py-3 bg-gradient-to-r from-pink-500 to-rose-600 rounded-xl font-bold"
+        class="w-full py-3 bg-gradient-to-r from-pink-500 to-rose-600 rounded-xl font-bold shadow-[0_0_20px_rgba(236,72,153,0.4)] hover:shadow-[0_0_30px_rgba(236,72,153,0.6)] transition-all"
       >
         Отметить начало цикла
       </button>
-      <div x-show="profile.cycleDay" class="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl p-4 border border-purple-500/30">
-        <p class="font-bold mb-2" x-text="getCyclePhase().name"></p>
-        <p class="text-sm text-gray-300" x-text="getCyclePhase().recommendation"></p>
-      </div>
     </div>
   </div>
   </template>
