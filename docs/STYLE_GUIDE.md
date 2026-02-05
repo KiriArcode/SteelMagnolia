@@ -1,240 +1,166 @@
-# 🎨 GymBro PWA — Style Guide & Cursor Reference
+# 🌸 SteelMagnolia — Style Guide для Cursor
 
-> Детальный справочник для верстки в Cursor  
-> Все значения pixel-perfect из React прототипа
-
----
-
-## 📋 Оглавление
-
-1. [Общие принципы](#общие-принципы)
-2. [Цвета](#цвета)
-3. [Типографика](#типографика)
-4. [Отступы и размеры](#отступы-и-размеры)
-5. [Компоненты](#компоненты)
-6. [Иконки](#иконки)
-7. [Анимации](#анимации)
-8. [Tailwind Patterns](#tailwind-patterns)
-9. [Alpine.js Patterns](#alpinejs-patterns)
-10. [Чеклист верстки](#чеклист-верстки)
+> Fitness tracker для Кристины  
+> UX/UI дизайнер • Гейм дизайнер • Любит яркие сочетания
 
 ---
 
-## 🎯 Общие принципы
+## 🎯 Концепция
 
-### Mobile-First
+### Ключевые слова
 ```
-Ширина экрана: 320px - 428px
-Ориентация: только portrait
-Touch targets: минимум 44x44px, рекомендуется 48x48px
-```
+Glow • Power • Play • Bloom • Level Up
+``` 
 
-### Структура страницы
-```html
-<body class="bg-gray-900 text-white min-h-screen">
-  <div class="max-w-md mx-auto">
-    <!-- Header (если есть) -->
-    <!-- Content с padding -->
-    <!-- Fixed bottom nav (если есть) -->
-  </div>
-</body>
-```
+### Design Pillars
 
-### Cursor Prompt Template
-```
-Создай [компонент] со следующими требованиями:
-- Tailwind CSS классы
-- Тёмная тема (bg-gray-900 основной фон)
-- Mobile-first (max-width: 428px)
-- Touch-friendly (кнопки минимум 48px)
-- Используй цвета из Style Guide
-```
+| Принцип | Описание |
+|---------|----------|
+| **Glow Aesthetic** | Неоновые свечения, градиенты с blur |
+| **Game Feel** | XP, уровни, badges, progress bars |
+| **Bold Colors** | Яркие контрасты, не бояться цвета |
+| **Soft Forms** | Blob-формы, большие радиусы, плавность |
 
 ---
 
-## 🎨 Цвета
+## 🎨 Цветовая палитра
 
-### Background Colors
-| Название | Tailwind | HEX | Использование |
-|----------|----------|-----|---------------|
-| Primary BG | `bg-gray-900` | #111827 | Основной фон страницы |
-| Card BG | `bg-gray-800` | #1f2937 | Карточки, секции |
-| Input BG | `bg-gray-700` | #374151 | Инпуты, кнопки secondary |
-| Hover BG | `bg-gray-600` | #4b5563 | Hover состояния |
-
-### Text Colors
-| Название | Tailwind | HEX | Использование |
-|----------|----------|-----|---------------|
-| Primary | `text-white` | #FFFFFF | Заголовки, важный текст |
-| Secondary | `text-gray-300` | #D1D5DB | Основной текст |
-| Muted | `text-gray-400` | #9CA3AF | Подписи, метаданные |
-| Disabled | `text-gray-500` | #6B7280 | Неактивные элементы |
-
-### Accent Colors (Gradients)
-| Название | Tailwind Gradient | Использование |
-|----------|-------------------|---------------|
-| Primary | `from-blue-500 to-purple-600` | Главные CTA кнопки |
-| Upper Body | `from-blue-500 to-blue-600` | Карточка Upper Body |
-| Lower Body | `from-green-500 to-green-600` | Карточка Lower Body |
-| Full Body | `from-orange-500 to-red-500` | Карточка Full Body |
-| Cardio | `from-purple-500 to-pink-600` | Карточка Cardio |
-| Success | `from-green-500 to-emerald-600` | Кнопка сохранения |
-
-### Solid Accent Colors
-| Название | Tailwind | HEX | Использование |
-|----------|----------|-----|---------------|
-| Blue | `bg-blue-500` | #3B82F6 | Кнопки навигации |
-| Green | `bg-green-500` | #22C55E | Успех, записанные сеты |
-| Orange | `text-orange-400` | #FB923C | Стрик, предупреждения |
-| Red | `text-red-400` | #F87171 | Ошибки, пульс |
-| Purple | `bg-purple-500` | #A855F7 | Кардио, выбранные элементы |
-
-### Opacity Backgrounds
+### Background (Тёмная база)
 ```css
-/* Для карточек поверх градиентов */
-bg-white/20    /* rgba(255,255,255,0.2) - иконки на цветном фоне */
-bg-gray-800/50 /* rgba(31,41,55,0.5) - карточки в HR zones */
-bg-green-500/20 /* Фон записанных сетов */
-bg-blue-500/30  /* Фон типа тренировки в истории */
+--bg-void:      #0a0a0f;   /* Основной фон */
+--bg-card:      #13131a;   /* Карточки */
+--bg-elevated:  #1c1c26;   /* Поднятые элементы */
+--bg-input:     #252532;   /* Инпуты */
 ```
 
-### Cursor Prompt для цветов
+**Tailwind:**
+```html
+bg-[#0a0a0f]   /* Основной фон */
+bg-[#13131a]   /* Карточки */
+bg-[#1c1c26]   /* Elevated */
+bg-[#252532]   /* Inputs */
 ```
-Используй цветовую схему:
-- Фон страницы: bg-gray-900
-- Карточки: bg-gray-800
-- Инпуты/кнопки: bg-gray-700
-- Текст основной: text-white или text-gray-300
-- Текст вторичный: text-gray-400
-- Акценты: градиенты from-X-500 to-Y-600
+
+### Primary Gradient (Signature)
+```css
+/* Основной градиент бренда */
+background: linear-gradient(135deg, #a855f7 0%, #ec4899 50%, #f97316 100%);
+/* Purple → Pink → Orange */
+```
+
+**Tailwind:**
+```html
+bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500
+```
+
+### Accent Colors
+| Цвет | HEX | Tailwind | Использование |
+|------|-----|----------|---------------|
+| **Purple** | `#a855f7` | `purple-500` | Primary actions, XP |
+| **Pink** | `#ec4899` | `pink-500` | Highlights, hearts |
+| **Orange** | `#f97316` | `orange-500` | Streak, fire |
+| **Cyan** | `#06b6d4` | `cyan-500` | Info, cardio |
+| **Lime** | `#84cc16` | `lime-500` | Success, complete |
+| **Yellow** | `#facc15` | `yellow-400` | Stars, rewards |
+
+### Workout Type Colors
+| Тренировка | Градиент | Tailwind |
+|------------|----------|----------|
+| **Glutes & Legs** | Pink → Rose | `from-pink-500 to-rose-600` |
+| **Abs & Core** | Orange → Amber | `from-orange-500 to-amber-600` |
+| **Arms & Upper** | Purple → Violet | `from-purple-500 to-violet-600` |
+| **Cardio** | Cyan → Teal | `from-cyan-500 to-teal-600` |
+| **Full Body** | Pink → Orange (signature) | `from-pink-500 via-purple-500 to-orange-500` |
+
+### Glow Effects
+```css
+/* Neon glow для кнопок и акцентов */
+.glow-pink {
+  box-shadow: 0 0 20px rgba(236, 72, 153, 0.5),
+              0 0 40px rgba(236, 72, 153, 0.3);
+}
+
+.glow-purple {
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.5),
+              0 0 40px rgba(168, 85, 247, 0.3);
+}
+
+.glow-orange {
+  box-shadow: 0 0 20px rgba(249, 115, 22, 0.5),
+              0 0 40px rgba(249, 115, 22, 0.3);
+}
+```
+
+**Tailwind:**
+```html
+shadow-[0_0_20px_rgba(236,72,153,0.5)]
+shadow-[0_0_30px_rgba(168,85,247,0.4)]
 ```
 
 ---
 
-## 🔤 Типографика
+## ✨ Типографика
 
-### Font Family
+### Font Stack
 ```css
-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-/* В Tailwind это дефолтный font-sans */
+font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+/* Или для более игривого вайба: */
+font-family: 'Nunito', 'Poppins', sans-serif;
 ```
 
-### Размеры текста
-| Название | Tailwind | Размер | Line Height | Использование |
-|----------|----------|--------|-------------|---------------|
-| 4XL | `text-4xl` | 36px | 40px | Большие числа (вес, повторы) |
-| 2XL | `text-2xl` | 24px | 32px | Заголовки страниц, стрик |
-| XL | `text-xl` | 20px | 28px | Заголовки секций |
-| LG | `text-lg` | 18px | 28px | Названия упражнений, кнопки |
-| Base | `text-base` | 16px | 24px | Основной текст |
-| SM | `text-sm` | 14px | 20px | Вторичный текст, подписи |
-| XS | `text-xs` | 12px | 16px | Мелкие подписи, дни недели |
+### Размеры
+| Название | Tailwind | Размер | Использование |
+|----------|----------|--------|---------------|
+| Display | `text-4xl` | 36px | Большие числа, XP |
+| Title | `text-2xl` | 24px | Заголовки страниц |
+| Heading | `text-xl` | 20px | Заголовки секций |
+| Body | `text-base` | 16px | Основной текст |
+| Caption | `text-sm` | 14px | Подписи |
+| Tiny | `text-xs` | 12px | Мелкие метки |
 
-### Font Weight
-| Tailwind | Значение | Использование |
-|----------|----------|---------------|
-| `font-bold` | 700 | Заголовки, числа, кнопки |
-| `font-semibold` | 600 | Названия упражнений |
-| `font-medium` | 500 | Важный текст |
-| `font-normal` | 400 | Обычный текст |
-
-### Примеры комбинаций
+### Стили текста
 ```html
-<!-- Заголовок страницы -->
-<h1 class="text-2xl font-bold">GYM Tracker</h1>
+<!-- Заголовок с градиентом -->
+<h1 class="text-3xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent">
+  SteelMagnolia
+</h1>
 
-<!-- Название упражнения -->
-<h2 class="text-lg font-bold">Тяга верхнего блока</h2>
-
-<!-- Большое число (вес) -->
-<p class="text-4xl font-bold">42.5</p>
+<!-- Обычный заголовок -->
+<h2 class="text-xl font-bold text-white">Сегодня</h2>
 
 <!-- Подпись -->
-<p class="text-sm text-gray-400">Прошлый раз: 40 кг</p>
+<p class="text-sm text-gray-400">5 упражнений • 30 мин</p>
 
-<!-- Мелкая метка -->
-<span class="text-xs text-gray-500">Пн</span>
-```
-
-### Cursor Prompt для типографики
-```
-Типографика:
-- Заголовки страниц: text-2xl font-bold
-- Заголовки секций: text-xl font-bold или text-lg font-semibold  
-- Большие числа: text-4xl font-bold
-- Основной текст: text-base
-- Подписи: text-sm text-gray-400
-- Мелкий текст: text-xs text-gray-500
+<!-- Акцентный текст -->
+<span class="text-pink-400 font-semibold">+150 XP</span>
 ```
 
 ---
 
-## 📏 Отступы и размеры
+## 📐 Spacing & Layout
 
-### Spacing Scale
-| Tailwind | Pixels | Использование |
-|----------|--------|---------------|
-| `p-1` / `m-1` | 4px | Минимальный отступ |
-| `p-2` / `m-2` | 8px | Между мелкими элементами |
-| `p-3` / `m-3` | 12px | Padding в бейджах |
-| `p-4` / `m-4` | 16px | Стандартный padding страницы |
-| `p-5` / `m-5` | 20px | Padding в карточках |
-| `p-6` / `m-6` | 24px | Большие отступы |
-| `mb-4` | 16px | Между карточками |
-| `mb-6` | 24px | Между секциями |
-| `gap-2` | 8px | В flex между элементами |
-| `gap-3` | 12px | Между кнопками |
-| `gap-4` | 16px | Между карточками |
-
-### Border Radius
-| Tailwind | Pixels | Использование |
-|----------|--------|---------------|
-| `rounded` | 4px | Мелкие элементы |
-| `rounded-lg` | 8px | Кнопки, инпуты |
-| `rounded-xl` | 12px | Карточки средние |
-| `rounded-2xl` | 16px | Большие карточки |
-| `rounded-full` | 9999px | Круглые кнопки, аватары |
-
-### Фиксированные размеры
-| Элемент | Размер | Tailwind |
-|---------|--------|----------|
-| Touch target min | 44×44px | `w-11 h-11` |
-| Icon button | 48×48px | `w-12 h-12` |
-| Weight +/- button | 56×56px | `w-14 h-14` |
-| Large icon | 64×64px | `w-16 h-16` |
-| Exercise icon | 80×80px | `w-20 h-20` |
-| Primary button height | 56px | `h-14` или `py-4` |
-| Nav button height | 48px | `h-12` или `py-3` |
-| Card icon | 40×40px | `w-10 h-10` |
-
-### Примеры
+### Border Radius (Мягкие формы)
 ```html
-<!-- Padding страницы -->
-<div class="p-4">...</div>
-
-<!-- Карточка -->
-<div class="bg-gray-800 rounded-2xl p-4 mb-4">...</div>
-
-<!-- Flex с gap -->
-<div class="flex gap-3">...</div>
-
-<!-- Кнопка +/- -->
-<button class="w-14 h-14 bg-gray-700 rounded-xl">...</button>
-
-<!-- Иконка упражнения -->
-<div class="w-20 h-20 bg-gray-700 rounded-xl p-2">...</div>
+rounded-2xl    /* 16px - Карточки */
+rounded-3xl    /* 24px - Большие карточки */
+rounded-full   /* Круглые кнопки, аватары */
 ```
 
-### Cursor Prompt для отступов
+### Spacing
+```html
+p-4      /* 16px - Стандартный padding */
+p-5      /* 20px - Карточки */
+p-6      /* 24px - Большие секции */
+gap-3    /* 12px - Между элементами */
+gap-4    /* 16px - Между карточками */
+mb-6     /* 24px - Между секциями */
 ```
-Отступы и размеры:
-- Padding страницы: p-4 (16px)
-- Padding карточек: p-4 или p-5
-- Margin между карточками: mb-4
-- Border radius карточек: rounded-2xl
-- Кнопки +/-: w-14 h-14
-- Иконки упражнений: w-20 h-20
-- Touch targets: минимум w-12 h-12
+
+### Touch Targets
+```html
+w-14 h-14    /* 56px - Кнопки +/- */
+w-12 h-12    /* 48px - Icon buttons */
+min-h-[56px] /* Минимум для тапа */
 ```
 
 ---
@@ -243,262 +169,268 @@ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
 ### 1. Primary Button (CTA)
 ```html
-<button class="w-full bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl p-5 flex items-center justify-between shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-transform">
-  <div class="flex items-center gap-3">
-    <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
-      <!-- Icon -->
-    </div>
-    <div class="text-left">
-      <p class="font-bold text-lg">Начать тренировку</p>
-      <p class="text-blue-200 text-sm">Подзаголовок</p>
-    </div>
-  </div>
-  <ChevronRight />
+<button class="
+  w-full py-4 px-6
+  bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500
+  rounded-2xl
+  font-bold text-lg text-white
+  shadow-[0_0_30px_rgba(236,72,153,0.4)]
+  active:scale-[0.98] transition-all
+  hover:shadow-[0_0_40px_rgba(236,72,153,0.6)]
+">
+  Начать тренировку ✨
 </button>
 ```
 
-**Cursor Prompt:**
-```
-Создай Primary CTA кнопку:
-- Ширина 100%
-- Градиент from-blue-500 to-purple-600
-- rounded-2xl, p-5
-- Внутри: иконка 56x56 слева, текст по центру, стрелка справа
-- shadow-lg shadow-blue-500/20
-- При нажатии: active:scale-[0.98]
-```
-
-### 2. Card Button (Выбор тренировки)
+### 2. Workout Card
 ```html
-<button class="w-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl p-4 flex items-center gap-4 shadow-lg active:scale-[0.98] transition-transform">
-  <div class="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center p-2">
-    <!-- SVG Icon -->
+<button class="
+  w-full p-5
+  bg-gradient-to-br from-pink-500/20 to-rose-600/20
+  border border-pink-500/30
+  rounded-3xl
+  backdrop-blur-sm
+  active:scale-[0.98] transition-all
+  hover:border-pink-500/50
+  hover:shadow-[0_0_30px_rgba(236,72,153,0.2)]
+">
+  <div class="flex items-center gap-4">
+    <!-- Icon with glow -->
+    <div class="w-16 h-16 bg-gradient-to-br from-pink-500 to-rose-600 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(236,72,153,0.5)]">
+      🍑
+    </div>
+    <div class="flex-1 text-left">
+      <h3 class="font-bold text-lg text-white">Glutes & Legs</h3>
+      <p class="text-pink-300/70 text-sm">5 упражнений • 40 мин</p>
+    </div>
+    <div class="text-pink-400">
+      →
+    </div>
   </div>
-  <div class="flex-1 text-left">
-    <p class="text-2xl mb-1">💪</p>
-    <p class="font-bold text-lg">Upper Body</p>
-    <p class="text-white/70 text-sm">6 упражнений + 30 мин кардио</p>
-  </div>
-  <ChevronRight />
 </button>
 ```
 
-**Cursor Prompt:**
-```
-Создай карточку выбора тренировки:
-- Ширина 100%
-- Градиент по типу тренировки (blue/green/orange/purple)
-- rounded-2xl, p-4
-- Иконка 64x64 с bg-white/20
-- Эмодзи + название + описание
-- Стрелка справа
-- active:scale-[0.98]
-```
-
-### 3. Info Card
+### 3. XP Badge
 ```html
-<div class="bg-gray-800 rounded-2xl p-4 mb-4">
-  <div class="flex justify-between items-center mb-3">
-    <span class="text-gray-400">Заголовок</span>
-    <span class="text-lg font-semibold">Значение</span>
-  </div>
-  <!-- Content -->
+<div class="
+  inline-flex items-center gap-1.5 
+  px-3 py-1.5 
+  bg-purple-500/20 
+  border border-purple-500/30 
+  rounded-full
+">
+  <span class="text-purple-400">⚡</span>
+  <span class="text-purple-300 font-bold text-sm">2,450 XP</span>
 </div>
 ```
 
-### 4. Input с +/- кнопками
+### 4. Streak Fire
 ```html
-<div class="mb-6">
-  <p class="text-sm text-gray-400 text-center mb-2">Вес (кг)</p>
-  <div class="flex items-center justify-center gap-4">
-    <button class="w-14 h-14 bg-gray-700 rounded-xl flex items-center justify-center active:bg-gray-600">
-      <Minus />
-    </button>
-    <div class="w-24 text-center">
-      <p class="text-4xl font-bold">42.5</p>
-    </div>
-    <button class="w-14 h-14 bg-gray-700 rounded-xl flex items-center justify-center active:bg-gray-600">
-      <Plus />
-    </button>
+<div class="flex items-center gap-2">
+  <div class="
+    w-12 h-12 
+    bg-gradient-to-br from-orange-500 to-amber-600 
+    rounded-xl 
+    flex items-center justify-center
+    shadow-[0_0_20px_rgba(249,115,22,0.5)]
+    animate-pulse
+  ">
+    🔥
+  </div>
+  <div>
+    <p class="text-2xl font-bold text-white">12</p>
+    <p class="text-xs text-orange-300/70">дней подряд</p>
   </div>
 </div>
 ```
 
-**Cursor Prompt:**
-```
-Создай инпут веса с кнопками +/-:
-- Подпись сверху: text-sm text-gray-400 text-center
-- Кнопки: w-14 h-14 bg-gray-700 rounded-xl
-- Число по центру: text-4xl font-bold, ширина w-24
-- Gap между элементами: gap-4
-- При нажатии на кнопки: active:bg-gray-600
-```
-
-### 5. Badge (Записанный сет)
+### 5. Progress Ring
 ```html
-<div class="bg-green-500/20 border border-green-500/50 rounded-lg px-3 py-2 text-sm">
-  <span class="text-green-400 font-semibold">42.5 кг</span>
-  <span class="text-gray-400"> × </span>
-  <span>12</span>
-</div>
-```
-
-### 6. Header с прогрессом
-```html
-<div class="bg-gradient-to-r from-blue-500 to-blue-600 p-4">
-  <div class="flex items-center justify-between mb-2">
-    <button class="p-2 hover:bg-white/20 rounded-lg">
-      <ChevronLeft />
-    </button>
-    <div class="text-center">
-      <p class="text-sm opacity-80">Upper Body</p>
-      <p class="font-bold">1 / 6</p>
-    </div>
-    <button class="p-2 hover:bg-white/20 rounded-lg text-sm">
-      Завершить
-    </button>
-  </div>
-  <!-- Progress bar -->
-  <div class="h-2 bg-white/20 rounded-full overflow-hidden">
-    <div class="h-full bg-white transition-all" style="width: 16.67%"></div>
+<div class="relative w-24 h-24">
+  <!-- Background ring -->
+  <svg class="w-full h-full -rotate-90">
+    <circle cx="48" cy="48" r="40" stroke="#252532" stroke-width="8" fill="none"/>
+    <!-- Progress (75% = 0.75 * 251.2) -->
+    <circle cx="48" cy="48" r="40" 
+      stroke="url(#gradient)" 
+      stroke-width="8" 
+      fill="none"
+      stroke-dasharray="251.2"
+      stroke-dashoffset="62.8"
+      stroke-linecap="round"
+      class="drop-shadow-[0_0_10px_rgba(236,72,153,0.5)]"
+    />
+    <defs>
+      <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#a855f7"/>
+        <stop offset="100%" stop-color="#ec4899"/>
+      </linearGradient>
+    </defs>
+  </svg>
+  <!-- Center text -->
+  <div class="absolute inset-0 flex flex-col items-center justify-center">
+    <span class="text-2xl font-bold text-white">75%</span>
+    <span class="text-xs text-gray-400">complete</span>
   </div>
 </div>
 ```
 
-### 7. Bottom Navigation
+### 6. Input с +/- (Glamour версия)
 ```html
-<div class="fixed bottom-0 left-0 right-0 bg-gray-800 border-t border-gray-700 p-4">
-  <div class="flex gap-4 max-w-md mx-auto">
-    <button class="flex-1 bg-gray-700 rounded-xl py-3 font-semibold flex items-center justify-center gap-2">
-      <ChevronLeft /> Назад
+<div class="flex items-center justify-center gap-4">
+  <!-- Minus -->
+  <button class="
+    w-14 h-14 
+    bg-[#252532] 
+    border border-pink-500/20
+    rounded-2xl 
+    flex items-center justify-center
+    text-pink-400 text-2xl
+    active:bg-pink-500/20 active:scale-95
+    transition-all
+  ">
+    −
+  </button>
+  
+  <!-- Value -->
+  <div class="w-28 text-center">
+    <p class="text-5xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+      42.5
+    </p>
+    <p class="text-sm text-gray-500">кг</p>
+  </div>
+  
+  <!-- Plus -->
+  <button class="
+    w-14 h-14 
+    bg-gradient-to-br from-purple-500/30 to-pink-500/30
+    border border-pink-500/30
+    rounded-2xl 
+    flex items-center justify-center
+    text-pink-300 text-2xl
+    active:from-purple-500/50 active:to-pink-500/50 active:scale-95
+    transition-all
+  ">
+    +
+  </button>
+</div>
+```
+
+### 7. Set Badge (Recorded)
+```html
+<div class="
+  inline-flex items-center gap-2 
+  px-4 py-2 
+  bg-lime-500/20 
+  border border-lime-500/30 
+  rounded-xl
+">
+  <span class="text-lime-400">✓</span>
+  <span class="text-lime-300 font-semibold">42.5 кг</span>
+  <span class="text-lime-300/50"> × </span>
+  <span class="text-lime-300">12</span>
+</div>
+```
+
+### 8. Bottom Navigation
+```html
+<nav class="
+  fixed bottom-0 left-0 right-0 
+  bg-[#13131a]/90 
+  backdrop-blur-lg 
+  border-t border-white/5
+  px-6 py-4
+  safe-area-pb
+">
+  <div class="flex justify-around max-w-md mx-auto">
+    <!-- Active -->
+    <button class="flex flex-col items-center gap-1">
+      <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(168,85,247,0.4)]">
+        <span class="text-xl">🏠</span>
+      </div>
+      <span class="text-xs text-pink-300">Home</span>
     </button>
-    <button class="flex-1 bg-blue-500 rounded-xl py-3 font-semibold flex items-center justify-center gap-2">
-      Далее <ChevronRight />
+    
+    <!-- Inactive -->
+    <button class="flex flex-col items-center gap-1">
+      <div class="w-12 h-12 bg-[#252532] rounded-2xl flex items-center justify-center">
+        <span class="text-xl opacity-50">📊</span>
+      </div>
+      <span class="text-xs text-gray-500">Stats</span>
     </button>
+    
+    <!-- Inactive -->
+    <button class="flex flex-col items-center gap-1">
+      <div class="w-12 h-12 bg-[#252532] rounded-2xl flex items-center justify-center">
+        <span class="text-xl opacity-50">👤</span>
+      </div>
+      <span class="text-xs text-gray-500">Profile</span>
+    </button>
+  </div>
+</nav>
+```
+
+### 9. Achievement Badge
+```html
+<div class="
+  p-4 
+  bg-gradient-to-br from-yellow-500/20 to-orange-500/20 
+  border border-yellow-500/30 
+  rounded-3xl
+  flex items-center gap-4
+">
+  <div class="
+    w-16 h-16 
+    bg-gradient-to-br from-yellow-400 to-orange-500 
+    rounded-2xl 
+    flex items-center justify-center
+    shadow-[0_0_25px_rgba(250,204,21,0.5)]
+  ">
+    <span class="text-3xl">🏆</span>
+  </div>
+  <div>
+    <h4 class="font-bold text-yellow-300">First Week!</h4>
+    <p class="text-sm text-yellow-300/60">7 тренировок подряд</p>
+  </div>
+  <div class="ml-auto text-yellow-400 font-bold">
+    +500 XP
   </div>
 </div>
 ```
 
-**Cursor Prompt:**
-```
-Создай нижнюю навигацию:
-- fixed bottom-0 left-0 right-0
-- bg-gray-800 border-t border-gray-700
-- Padding: p-4
-- Две кнопки в ряд с gap-4
-- Левая: bg-gray-700, правая: bg-blue-500
-- rounded-xl py-3
-- Иконки + текст с gap-2
-```
-
-### 8. Slider (Range input)
+### 10. Mood Slider
 ```html
-<div class="bg-gray-800 rounded-2xl p-4">
-  <p class="text-sm text-gray-400 mb-3">Как себя чувствуешь?</p>
-  <div class="flex items-center justify-between mb-2">
-    <span class="text-3xl">😊</span>
-    <span class="text-4xl font-bold">7</span>
+<div class="bg-[#1c1c26] rounded-3xl p-5">
+  <div class="flex justify-between items-center mb-4">
+    <span class="text-4xl" x-text="getMoodEmoji(mood)">😊</span>
+    <span class="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent" x-text="mood">8</span>
   </div>
-  <input
-    type="range"
-    min="1"
-    max="10"
-    value="7"
-    class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-green-500"
+  
+  <input 
+    type="range" 
+    min="1" max="10" 
+    x-model="mood"
+    class="
+      w-full h-2 
+      bg-[#252532] 
+      rounded-full 
+      appearance-none 
+      cursor-pointer
+      [&::-webkit-slider-thumb]:appearance-none
+      [&::-webkit-slider-thumb]:w-6
+      [&::-webkit-slider-thumb]:h-6
+      [&::-webkit-slider-thumb]:rounded-full
+      [&::-webkit-slider-thumb]:bg-gradient-to-r
+      [&::-webkit-slider-thumb]:from-purple-500
+      [&::-webkit-slider-thumb]:to-pink-500
+      [&::-webkit-slider-thumb]:shadow-[0_0_15px_rgba(236,72,153,0.6)]
+    "
   >
-  <div class="flex justify-between text-xs text-gray-500 mt-1">
-    <span>Плохо</span>
-    <span>Отлично</span>
+  
+  <div class="flex justify-between text-xs text-gray-500 mt-2">
+    <span>😫 Устала</span>
+    <span>💪 Огонь!</span>
   </div>
-</div>
-```
-
-### 9. Quick Select Buttons
-```html
-<div class="flex justify-center gap-2 mt-3">
-  <button class="px-4 py-2 rounded-lg text-sm bg-gray-700">20</button>
-  <button class="px-4 py-2 rounded-lg text-sm bg-purple-500">30</button>
-  <button class="px-4 py-2 rounded-lg text-sm bg-gray-700">45</button>
-  <button class="px-4 py-2 rounded-lg text-sm bg-gray-700">60</button>
-</div>
-```
-
-### 10. Week Progress
-```html
-<div class="flex gap-1 mb-3">
-  <!-- Для каждого дня -->
-  <div class="flex-1 text-center">
-    <div class="h-10 rounded-lg mb-1 flex items-center justify-center bg-green-500">
-      <Check />
-    </div>
-    <span class="text-xs text-gray-500">Пн</span>
-  </div>
-  <!-- Текущий день -->
-  <div class="flex-1 text-center">
-    <div class="h-10 rounded-lg mb-1 flex items-center justify-center bg-blue-500 animate-pulse">
-    </div>
-    <span class="text-xs text-gray-500">Ср</span>
-  </div>
-  <!-- Будущий день -->
-  <div class="flex-1 text-center">
-    <div class="h-10 rounded-lg mb-1 flex items-center justify-center bg-gray-700">
-    </div>
-    <span class="text-xs text-gray-500">Чт</span>
-  </div>
-</div>
-```
-
----
-
-## 🖼 Иконки
-
-### Lucide Icons (основные UI)
-```html
-<!-- Подключение -->
-<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-
-<!-- Использование -->
-<i data-lucide="chevron-left" class="w-6 h-6"></i>
-<i data-lucide="chevron-right" class="w-6 h-6"></i>
-<i data-lucide="check" class="w-6 h-6"></i>
-<i data-lucide="plus" class="w-6 h-6"></i>
-<i data-lucide="minus" class="w-6 h-6"></i>
-<i data-lucide="dumbbell" class="w-8 h-8"></i>
-<i data-lucide="heart" class="w-5 h-5 text-red-400"></i>
-<i data-lucide="flame" class="w-5 h-5 text-orange-400"></i>
-<i data-lucide="calendar" class="w-5 h-5 text-gray-400"></i>
-<i data-lucide="activity" class="w-5 h-5"></i>
-<i data-lucide="trending-up" class="w-4 h-4"></i>
-<i data-lucide="rotate-ccw" class="w-4 h-4"></i>
-<i data-lucide="award" class="w-10 h-10 text-green-400"></i>
-
-<!-- Инициализация -->
-<script>lucide.createIcons();</script>
-```
-
-### Размеры иконок
-| Контекст | Класс | Размер |
-|----------|-------|--------|
-| Inline с текстом | `w-4 h-4` | 16px |
-| Маленькая в кнопке | `w-5 h-5` | 20px |
-| Стандартная | `w-6 h-6` | 24px |
-| Большая в CTA | `w-8 h-8` | 32px |
-| Hero icon | `w-10 h-10` | 40px |
-
-### Exercise Icons (SVG)
-```html
-<!-- Контейнер для иконки упражнения -->
-<div class="w-20 h-20 bg-gray-700 rounded-xl p-2">
-  <svg viewBox="0 0 64 64" class="w-full h-full">
-    <!-- SVG content -->
-  </svg>
-</div>
-
-<!-- На цветном фоне -->
-<div class="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center p-2">
-  <svg viewBox="0 0 64 64" class="w-full h-full">
-    <!-- SVG content with fill="white" -->
-  </svg>
 </div>
 ```
 
@@ -506,295 +438,322 @@ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
 ## ✨ Анимации
 
-### Tailwind Transitions
-```html
-<!-- Плавное изменение всего -->
-<div class="transition-all duration-200">
-
-<!-- Только transform -->
-<button class="transition-transform active:scale-[0.98]">
-
-<!-- Только цвета -->
-<button class="transition-colors hover:bg-gray-600">
-
-<!-- Только opacity -->
-<div class="transition-opacity opacity-0 hover:opacity-100">
-```
-
-### Pulse (текущий день/элемент)
-```html
-<div class="animate-pulse bg-blue-500">...</div>
-```
-
-### Custom CSS анимации
+### CSS Keyframes
 ```css
-/* В custom.css */
-
-/* Fade in при появлении */
-.animate-fadeIn {
-  animation: fadeIn 0.2s ease-out;
+/* Glow pulse */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(236, 72, 153, 0.4); }
+  50% { box-shadow: 0 0 40px rgba(236, 72, 153, 0.6); }
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+/* Float */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
 }
 
-/* Slide up для модалок */
-.animate-slideUp {
-  animation: slideUp 0.3s ease-out;
+/* Sparkle */
+@keyframes sparkle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.2); }
 }
 
-@keyframes slideUp {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
+/* Confetti burst */
+@keyframes confetti {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(-100px) rotate(720deg); opacity: 0; }
 }
 
-/* Scale для успеха */
-.animate-success {
-  animation: success 0.3s ease-out;
+/* Slide up */
+@keyframes slide-up {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
-@keyframes success {
+/* Scale pop */
+@keyframes pop {
   0% { transform: scale(0.8); opacity: 0; }
   50% { transform: scale(1.1); }
   100% { transform: scale(1); opacity: 1; }
 }
 ```
 
-### Cursor Prompt для анимаций
+### Tailwind Animation Classes
+```html
+animate-pulse           /* Пульсация */
+animate-bounce          /* Прыжок */
+animate-[glow-pulse_2s_infinite]
+animate-[float_3s_ease-in-out_infinite]
+animate-[pop_0.3s_ease-out]
 ```
-Добавь анимации:
-- Кнопки при нажатии: active:scale-[0.98] transition-transform
-- Hover на карточках: hover:bg-gray-600 transition-colors
-- Текущий день: animate-pulse
-- Появление элементов: transition-all duration-200
+
+### Transition для интерактивности
+```html
+transition-all duration-200
+active:scale-[0.97]
+hover:shadow-[0_0_30px_rgba(236,72,153,0.4)]
 ```
 
 ---
 
-## 🌀 Tailwind Patterns
+## 🎮 Геймификация
 
-### Flex Layouts
-```html
-<!-- Центрирование -->
-<div class="flex items-center justify-center">
-
-<!-- Между краями -->
-<div class="flex items-center justify-between">
-
-<!-- В колонку -->
-<div class="flex flex-col gap-4">
-
-<!-- Flex-1 для заполнения -->
-<div class="flex gap-4">
-  <div class="flex-1">Растянется</div>
-  <div class="w-12">Фиксированная</div>
-</div>
-```
-
-### Grid Layouts
-```html
-<!-- 3 колонки -->
-<div class="grid grid-cols-3 gap-3">
-
-<!-- 7 колонок для дней недели -->
-<div class="flex gap-1">
-  <div class="flex-1">...</div> <!-- x7 -->
-</div>
-```
-
-### Responsive (если понадобится)
-```html
-<!-- Mobile first -->
-<div class="p-4 md:p-6 lg:p-8">
-<div class="text-sm md:text-base">
-<div class="grid-cols-2 md:grid-cols-3">
-```
-
-### Состояния
-```html
-<!-- Hover -->
-<button class="hover:bg-gray-700">
-
-<!-- Active (нажатие) -->
-<button class="active:bg-gray-600 active:scale-[0.98]">
-
-<!-- Focus -->
-<input class="focus:ring-2 focus:ring-blue-500 outline-none">
-
-<!-- Disabled -->
-<button class="disabled:opacity-50 disabled:cursor-not-allowed">
-```
-
-### Shadows
-```html
-<!-- Стандартная тень -->
-<div class="shadow-lg">
-
-<!-- Цветная тень под CTA -->
-<button class="shadow-lg shadow-blue-500/20">
-
-<!-- Тень под карточками -->
-<div class="shadow-md">
-```
-
----
-
-## 🔧 Alpine.js Patterns
-
-### Базовый компонент
-```html
-<div x-data="{ count: 0 }">
-  <button @click="count++">+</button>
-  <span x-text="count"></span>
-</div>
-```
-
-### Условный рендеринг
-```html
-<!-- Показать/скрыть -->
-<div x-show="isVisible">...</div>
-
-<!-- С анимацией -->
-<div x-show="isOpen" x-transition>...</div>
-
-<!-- Условие в классе -->
-<div :class="{ 'bg-green-500': isActive, 'bg-gray-700': !isActive }">
-```
-
-### Циклы
-```html
-<template x-for="item in items" :key="item.id">
-  <div x-text="item.name"></div>
-</template>
-```
-
-### Двухстороннее связывание
-```html
-<input type="text" x-model="searchQuery">
-<input type="range" x-model="moodValue">
-```
-
-### События
-```html
-<button @click="handleClick()">
-<button @click="page = 'dashboard'">
-<div @click.away="isOpen = false">
-```
-
-### Инициализация
-```html
-<div x-data="gymTracker()" x-init="init()">
-```
-
-### Computed-like
+### XP System
 ```javascript
-// В Alpine компоненте
-get currentExercise() {
-  return this.workout?.exercises[this.currentIndex];
+const XP_REWARDS = {
+  workout_complete: 100,      // Завершила тренировку
+  exercise_complete: 15,      // Выполнила упражнение
+  set_recorded: 5,            // Записала подход
+  streak_day: 25,             // День стрика
+  streak_week: 200,           // Неделя подряд
+  personal_record: 50,        // Новый рекорд
+  first_workout: 500,         // Первая тренировка
+};
+```
+
+### Levels
+```javascript
+const LEVELS = [
+  { level: 1, name: 'Новичок', xp: 0, emoji: '🌱' },
+  { level: 2, name: 'Старт взят', xp: 500, emoji: '🌿' },
+  { level: 3, name: 'В ритме', xp: 1500, emoji: '🌸' },
+  { level: 4, name: 'Набираю силу', xp: 3000, emoji: '💪' },
+  { level: 5, name: 'Фитнес-леди', xp: 5000, emoji: '🔥' },
+  { level: 6, name: 'Железная воля', xp: 8000, emoji: '⚡' },
+  { level: 7, name: 'Королева зала', xp: 12000, emoji: '👑' },
+  { level: 8, name: 'Легенда', xp: 20000, emoji: '🏆' },
+];
+```
+
+### Achievements
+```javascript
+const ACHIEVEMENTS = [
+  { id: 'first_workout', name: 'Первый шаг', emoji: '🎯', xp: 500 },
+  { id: 'week_streak', name: 'Неделя огня', emoji: '🔥', xp: 200 },
+  { id: 'month_streak', name: 'Месяц силы', emoji: '💎', xp: 1000 },
+  { id: 'glute_master', name: 'Glute Master', emoji: '🍑', xp: 300 },
+  { id: 'early_bird', name: 'Ранняя пташка', emoji: '🌅', xp: 150 },
+  { id: 'night_owl', name: 'Ночная сова', emoji: '🦉', xp: 150 },
+  { id: 'pr_breaker', name: 'Рекордсменка', emoji: '📈', xp: 250 },
+];
+```
+
+### Level Progress Bar
+```html
+<div class="bg-[#1c1c26] rounded-2xl p-4">
+  <div class="flex items-center justify-between mb-2">
+    <div class="flex items-center gap-2">
+      <span class="text-2xl">🌸</span>
+      <span class="font-bold text-white">Level 3</span>
+    </div>
+    <span class="text-sm text-gray-400">1,850 / 3,000 XP</span>
+  </div>
+  
+  <!-- Progress bar -->
+  <div class="h-3 bg-[#252532] rounded-full overflow-hidden">
+    <div 
+      class="h-full bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 rounded-full transition-all duration-500"
+      style="width: 62%"
+    ></div>
+  </div>
+  
+  <p class="text-xs text-gray-500 mt-2">1,150 XP до Level 4 💪</p>
+</div>
+```
+
+---
+
+## 🖼 Эмодзи для UI
+
+### Workout Types
+```
+🍑 Glutes & Legs
+🔥 Abs & Core  
+💪 Arms & Upper
+🏃‍♀️ Cardio
+⚡ Full Body
+🧘‍♀️ Stretch
+```
+
+### Mood Scale
+```javascript
+function getMoodEmoji(value) {
+  const emojis = {
+    1: '😫', 2: '😔', 3: '😕', 4: '😐', 5: '🙂',
+    6: '😊', 7: '😄', 8: '🤩', 9: '💪', 10: '🔥'
+  };
+  return emojis[value] || '😊';
+}
+```
+
+### UI Icons
+```
+✨ Success, magic
+⚡ XP, energy
+🔥 Streak, fire
+💎 Premium, special
+👑 Achievement
+🎯 Goal
+📈 Progress
+💪 Strength
+🏆 Trophy
+⭐ Star, favorite
+```
+
+---
+
+## 📱 Экраны (Wireframes)
+
+### Dashboard
+```
+┌─────────────────────────────────────┐
+│ SteelMagnolia    🔥 12   ⚡2.4k │
+├─────────────────────────────────────┤
+│                                     │
+│  ┌─────────────────────────────┐   │
+│  │  Level 3 🌸                 │   │
+│  │  ████████████░░░░  62%     │   │
+│  │  1,150 XP до Level 4       │   │
+│  └─────────────────────────────┘   │
+│                                     │
+│  Сегодня: Вторник                   │
+│  ┌─────────────────────────────┐   │
+│  │ 🍑 Glutes & Legs            →│   │
+│  │ 5 упр • 40 мин    +100 XP   │   │
+│  └─────────────────────────────┘   │
+│                                     │
+│  Неделя                             │
+│  ┌───┬───┬───┬───┬───┬───┬───┐   │
+│  │ ✓ │ ✓ │ ● │   │   │   │   │   │
+│  │Пн │Вт │Ср │Чт │Пт │Сб │Вс │   │
+│  └───┴───┴───┴───┴───┴───┴───┘   │
+│                                     │
+│  Последние достижения               │
+│  ┌──────┐ ┌──────┐ ┌──────┐       │
+│  │  🔥  │ │  🎯  │ │  📈  │       │
+│  │Week! │ │Start │ │ PR!  │       │
+│  └──────┘ └──────┘ └──────┘       │
+│                                     │
+├─────────────────────────────────────┤
+│  🏠      📊      👤                 │
+│  Home    Stats   Profile            │
+└─────────────────────────────────────┘
+```
+
+### Exercise Screen
+```
+┌─────────────────────────────────────┐
+│ ← Glutes & Legs          Завершить │
+├─────────────────────────────────────┤
+│  █████████░░░░░░░░░░  2/5           │
+├─────────────────────────────────────┤
+│                                     │
+│         ┌───────────┐               │
+│         │           │               │
+│         │    🍑     │               │
+│         │           │               │
+│         └───────────┘               │
+│                                     │
+│      Ягодичный мост                 │
+│      3 × 15 • Прошлый: 40 кг        │
+│                                     │
+│    ┌─────┐  ┌─────┐  ┌─────┐       │
+│    │✓ 40 │  │✓ 42 │  │  ?  │       │
+│    │ ×15 │  │ ×15 │  │     │       │
+│    └─────┘  └─────┘  └─────┘       │
+│                                     │
+│      Подход 3                       │
+│                                     │
+│    ┌───┐   ┌─────────┐   ┌───┐    │
+│    │ − │   │  42.5   │   │ + │    │
+│    └───┘   │   кг    │   └───┘    │
+│            └─────────┘             │
+│                                     │
+│    ┌───┐   ┌─────────┐   ┌───┐    │
+│    │ − │   │   15    │   │ + │    │
+│    └───┘   │  повт   │   └───┘    │
+│            └─────────┘             │
+│                                     │
+│   ┌─────────────────────────────┐  │
+│   │     ✓ Записать подход       │  │
+│   │         +5 XP               │  │
+│   └─────────────────────────────┘  │
+│                                     │
+├─────────────────────────────────────┤
+│   ← Назад          Далее →          │
+└─────────────────────────────────────┘
+```
+
+---
+
+## 🔧 Tailwind Config
+
+```javascript
+// tailwind.config.js (для справки)
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        'bg-void': '#0a0a0f',
+        'bg-card': '#13131a',
+        'bg-elevated': '#1c1c26',
+        'bg-input': '#252532',
+      },
+      borderRadius: {
+        '4xl': '2rem',
+      },
+      boxShadow: {
+        'glow-pink': '0 0 30px rgba(236, 72, 153, 0.4)',
+        'glow-purple': '0 0 30px rgba(168, 85, 247, 0.4)',
+        'glow-orange': '0 0 30px rgba(249, 115, 22, 0.4)',
+      },
+      animation: {
+        'glow-pulse': 'glow-pulse 2s ease-in-out infinite',
+        'float': 'float 3s ease-in-out infinite',
+      },
+    },
+  },
 }
 ```
 
 ---
 
-## ✅ Чеклист верстки
+## 📝 Cursor Prompt Template
 
-### Перед началом работы
-- [ ] Подключен Tailwind CDN
-- [ ] Подключен Alpine.js
-- [ ] Подключен Lucide Icons
-- [ ] Базовые стили body: `bg-gray-900 text-white min-h-screen`
+```
+Создай [компонент] для SteelMagnolia:
 
-### Для каждого компонента
-- [ ] Touch target минимум 44x44px (кнопки, ссылки)
-- [ ] Достаточный контраст текста
-- [ ] Правильные отступы (p-4 для страниц, p-4/p-5 для карточек)
-- [ ] Rounded corners (rounded-xl или rounded-2xl для карточек)
-- [ ] Анимация при нажатии на кнопки
+Стиль:
+- Тёмный фон: bg-[#0a0a0f] или bg-[#13131a]
+- Градиенты: from-purple-500 via-pink-500 to-orange-500
+- Glow эффекты: shadow-[0_0_30px_rgba(236,72,153,0.4)]
+- Скруглённые формы: rounded-2xl или rounded-3xl
+- Геймификация: XP бейджи, progress bars
 
-### Адаптивность
-- [ ] Работает на 320px ширине
-- [ ] Работает на 428px ширине
-- [ ] Текст не обрезается
-- [ ] Элементы не выходят за экран
+Цвета акцентов:
+- Pink #ec4899 — основной акцент
+- Purple #a855f7 — XP, уровни
+- Orange #f97316 — стрик, огонь
+- Lime #84cc16 — успех
+- Cyan #06b6d4 — кардио
 
-### Интерактивность
-- [ ] Hover состояния (desktop)
-- [ ] Active состояния (mobile)
-- [ ] Focus состояния (для accessibility)
-- [ ] Disabled состояния
-
-### Финальная проверка
-- [ ] Протестировано на iOS Safari
-- [ ] Протестировано на Android Chrome
-- [ ] Нет горизонтального скролла
-- [ ] Иконки отображаются
-- [ ] Шрифты загружаются
+Анимации:
+- active:scale-[0.97] на кнопках
+- hover:shadow-glow на интерактивных элементах
+- transition-all duration-200
+```
 
 ---
 
-## 📝 Cursor Prompt Templates
+## ✅ Отличия от GymBro
 
-### Создание страницы
-```
-Создай страницу [название] для GymBro PWA:
-
-Структура:
-- Header: [описание]
-- Content: [описание]
-- Footer/Navigation: [описание]
-
-Требования:
-- Tailwind CSS
-- Тёмная тема (bg-gray-900)
-- Mobile-first (max-width 428px)
-- Touch-friendly (кнопки 48px)
-- Alpine.js для интерактивности
-
-Используй стили из Style Guide:
-- Карточки: bg-gray-800 rounded-2xl p-4
-- Кнопки: bg-gradient-to-r rounded-xl
-- Текст: text-white для заголовков, text-gray-400 для подписей
-```
-
-### Создание компонента
-```
-Создай компонент [название]:
-
-Визуал:
-- [описание внешнего вида]
-
-Размеры:
-- Ширина: [значение]
-- Высота: [значение]
-- Padding: [значение]
-- Border radius: [значение]
-
-Цвета:
-- Фон: [цвет]
-- Текст: [цвет]
-- Border: [если есть]
-
-Состояния:
-- Default: [описание]
-- Hover: [описание]
-- Active: [описание]
-- Disabled: [если нужно]
-
-Код должен использовать Tailwind CSS классы.
-```
-
-### Исправление стилей
-```
-Исправь стили компонента [название]:
-
-Текущая проблема:
-- [описание]
-
-Ожидаемый результат:
-- [описание]
-
-Используй эти значения из Style Guide:
-- [конкретные значения]
-```
+| Элемент | GymBro | SteelMagnolia |
+|---------|--------|---------------|
+| Background | `#111827` | `#0a0a0f` (глубже) |
+| Primary | Blue/Purple | Pink/Purple/Orange gradient |
+| Cards | `bg-gray-800` | `bg-[#13131a]` + border glow |
+| Buttons | Solid gradient | Gradient + glow shadow |
+| Border Radius | `rounded-2xl` | `rounded-3xl` (мягче) |
+| Animations | Minimal | Expressive + glow |
+| Gamification | Streak only | XP + Levels + Badges |
+| Tone | Functional | Playful + Rewarding |

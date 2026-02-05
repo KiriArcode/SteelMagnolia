@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#111827">
+  <meta name="theme-color" content="#0a0a0f">
   <script>
     if (location.hostname.includes('github.io')) {
       var base = document.createElement('base');
@@ -27,15 +27,27 @@
       theme: {
         extend: {
           colors: {
+            'bg-void': '#0a0a0f',
+            'bg-card': '#13131a',
+            'bg-elevated': '#1c1c26',
+            'bg-input': '#252532',
             gray: {
-              900: '#111827',
-              800: '#1f2937',
-              700: '#374151',
-              600: '#4b5563',
+              900: '#0a0a0f',
+              800: '#13131a',
+              700: '#1c1c26',
+              600: '#252532',
               500: '#6b7280',
               400: '#9ca3af',
             }
-          }
+          },
+          borderRadius: {
+            '4xl': '2rem',
+          },
+          boxShadow: {
+            'glow-pink': '0 0 30px rgba(236, 72, 153, 0.4)',
+            'glow-purple': '0 0 30px rgba(168, 85, 247, 0.4)',
+            'glow-orange': '0 0 30px rgba(249, 115, 22, 0.4)',
+          },
         }
       }
     }
@@ -50,7 +62,7 @@
   <!-- Custom CSS -->
   <link rel="stylesheet" href="css/custom.css">
 </head>
-<body class="bg-gray-900 text-white min-h-screen" x-data="gymTracker()" x-init="init()">
+<body class="bg-[#0a0a0f] text-white min-h-screen" x-data="gymTracker()" x-init="init()">
 
   <!-- ========== СТРАНИЦА: DASHBOARD ========== -->
   <template x-if="page === 'dashboard'">
@@ -72,7 +84,7 @@
     </div>
 
     <!-- Week Progress Card -->
-    <div class="bg-gray-800 rounded-2xl p-4 mb-4">
+    <div class="bg-[#13131a] rounded-3xl p-4 mb-4 border border-white/5">
       <div class="flex justify-between items-center mb-3">
         <span class="text-gray-400">Эта неделя</span>
         <span class="text-lg font-semibold">
@@ -93,8 +105,8 @@
               :class="{
                 'bg-green-500 hover:bg-green-600 active:scale-95 cursor-pointer': day.completed && day.canMark,
                 'bg-blue-500 animate-pulse hover:bg-blue-600 active:scale-95 cursor-pointer': day.isToday && !day.completed && day.canMark,
-                'bg-gray-700 hover:bg-gray-600 active:scale-95 cursor-pointer': day.canMark && !day.completed && !day.isToday,
-                'bg-gray-700 cursor-default': !day.canMark
+                'bg-[#252532] hover:bg-[#1c1c26] active:scale-95 cursor-pointer transition-colors': day.canMark && !day.completed && !day.isToday,
+                'bg-[#252532] cursor-default': !day.canMark
               }"
             >
               <i x-show="day.completed" data-lucide="check" class="w-5 h-5"></i>
@@ -119,24 +131,24 @@
     </div>
 
     <!-- HR Zones Card -->
-    <div class="bg-gradient-to-r from-red-900/50 to-orange-900/50 rounded-2xl p-4 mb-4 border border-red-700/50">
+    <div class="bg-gradient-to-r from-red-900/50 to-orange-900/50 rounded-3xl p-4 mb-4 border border-red-700/50">
       <div class="flex items-center gap-2 mb-2">
         <i data-lucide="heart" class="w-5 h-5 text-red-400"></i>
         <span class="font-semibold">Пульсовые зоны</span>
         <span class="text-xs text-gray-400 ml-auto">Возраст: <span x-text="profile.age"></span></span>
       </div>
       <div class="grid grid-cols-3 gap-2 text-center">
-        <div class="bg-gray-800/50 rounded-lg p-2">
+        <div class="bg-[#1c1c26]/50 rounded-lg p-2 border border-white/5">
           <p class="text-xs text-gray-400">Макс ЧСС</p>
           <p class="text-xl font-bold text-red-400" x-text="profile.maxHR"></p>
         </div>
-        <div class="bg-gray-800/50 rounded-lg p-2">
+        <div class="bg-[#1c1c26]/50 rounded-lg p-2 border border-white/5">
           <p class="text-xs text-gray-400">Жиросжигание</p>
           <p class="text-xl font-bold text-orange-400">
             <span x-text="profile.fatBurnLow"></span>-<span x-text="profile.fatBurnHigh"></span>
           </p>
         </div>
-        <div class="bg-gray-800/50 rounded-lg p-2">
+        <div class="bg-[#1c1c26]/50 rounded-lg p-2 border border-white/5">
           <p class="text-xs text-gray-400">Интервал</p>
           <p class="text-xl font-bold text-yellow-400">
             <span x-text="profile.intervalLow"></span>-<span x-text="profile.intervalHigh"></span>
@@ -149,7 +161,7 @@
     <button
       type="button"
       @click="page = 'select-workout'"
-      class="w-full bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl p-5 mb-4 flex items-center justify-between shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-transform"
+      class="w-full bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 rounded-2xl p-5 mb-4 flex items-center justify-between shadow-[0_0_30px_rgba(236,72,153,0.4)] active:scale-[0.98] transition-all hover:shadow-[0_0_40px_rgba(236,72,153,0.6)]"
     >
       <div class="flex items-center gap-3">
         <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
@@ -164,14 +176,14 @@
     </button>
 
     <!-- Recent Workouts -->
-    <div class="bg-gray-800 rounded-2xl p-4">
+    <div class="bg-[#13131a] rounded-3xl p-4 border border-white/5">
       <h3 class="font-semibold mb-3 flex items-center gap-2">
         <i data-lucide="calendar" class="w-5 h-5 text-gray-400"></i>
         Последние тренировки
       </h3>
       <div class="space-y-2">
         <template x-for="workout in recentWorkouts" :key="workout.id">
-          <div class="flex items-center gap-3 bg-gray-700/50 rounded-xl p-3">
+          <div class="flex items-center gap-3 bg-[#1c1c26]/50 rounded-xl p-3 border border-white/5 hover:bg-[#1c1c26]/70 transition-colors">
             <div 
               class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
               :class="getWorkoutTypeColor(workout.type)"
@@ -190,7 +202,7 @@
               <button
                 type="button"
                 @click="editWorkout(workout)"
-                class="p-2 hover:bg-gray-600 rounded-lg"
+                class="p-2 hover:bg-[#252532] rounded-lg transition-colors"
                 title="Редактировать"
               >
                 <i data-lucide="pencil" class="w-4 h-4"></i>
@@ -218,12 +230,12 @@
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
       <div class="flex items-center gap-3">
-        <button type="button" @click="page = 'dashboard'" class="p-2 hover:bg-gray-800 rounded-lg">
+        <button type="button" @click="page = 'dashboard'" class="p-2 hover:bg-[#13131a] rounded-lg transition-colors">
           <i data-lucide="chevron-left" class="w-6 h-6"></i>
         </button>
         <h1 class="text-xl font-bold">Выбери тренировку</h1>
       </div>
-      <button type="button" @click="openManageExercises()" class="p-2 hover:bg-gray-800 rounded-lg" title="Управление упражнениями">
+      <button type="button" @click="openManageExercises()" class="p-2 hover:bg-[#13131a] rounded-lg transition-colors" title="Управление упражнениями">
         <i data-lucide="settings" class="w-5 h-5"></i>
       </button>
     </div>
@@ -239,8 +251,8 @@
         <button
           type="button"
           @click="planWorkoutKey = workout.key; page = 'workout-plan'"
-          class="w-full rounded-2xl p-4 flex items-center gap-4 shadow-lg active:scale-[0.98] transition-transform"
-          :class="workout.gradient"
+          class="w-full rounded-3xl p-5 flex items-center gap-4 shadow-lg active:scale-[0.98] transition-all border backdrop-blur-sm"
+          :class="workout.gradient + ' border-opacity-30 hover:shadow-[0_0_30px_rgba(236,72,153,0.2)]'"
         >
           <div class="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center p-2">
             <div x-html="getExerciseIcon(workout.exercises[0]?.icon || 'dumbbell')"></div>
@@ -261,7 +273,7 @@
       <button
         type="button"
         @click="isCardioOnly = true; page = 'cardio'; saveSession()"
-        class="w-full bg-gradient-to-r from-purple-500 to-pink-600 rounded-2xl p-4 flex items-center gap-4 shadow-lg active:scale-[0.98] transition-transform"
+        class="w-full bg-gradient-to-r from-cyan-500 to-teal-600 rounded-3xl p-5 flex items-center gap-4 shadow-[0_0_30px_rgba(6,182,212,0.4)] active:scale-[0.98] transition-all hover:shadow-[0_0_40px_rgba(6,182,212,0.6)] border border-cyan-500/30"
       >
         <div class="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center p-2">
           <div x-html="getExerciseIcon('treadmill')"></div>
@@ -281,7 +293,7 @@
   <template x-if="page === 'workout-plan'">
   <div class="min-h-screen p-4 pb-24">
     <div class="flex items-center gap-3 mb-6">
-      <button type="button" @click="page = 'select-workout'; planWorkoutKey = null" class="p-2 hover:bg-gray-800 rounded-lg">
+      <button type="button" @click="page = 'select-workout'; planWorkoutKey = null" class="p-2 hover:bg-[#13131a] rounded-lg transition-colors">
         <i data-lucide="chevron-left" class="w-6 h-6"></i>
       </button>
       <h1 class="text-xl font-bold" x-text="workouts[planWorkoutKey]?.name || 'План тренировки'"></h1>
@@ -296,14 +308,14 @@
               @dragover.prevent="onDragOver($event, i)"
               @drop="onDrop($event, i, 'plan')"
               @dragend="onDragEnd()"
-              class="flex items-center gap-3 p-3 rounded-xl transition-opacity cursor-move"
+              class="flex items-center gap-3 p-3 rounded-xl transition-opacity cursor-move border border-white/5 hover:bg-[#1c1c26]/50"
               :class="{
-                'bg-gray-800 opacity-60': isExerciseInactive(planWorkoutKey, ex.id),
-                'bg-gray-800 opacity-50': dragState.dragging === i,
-                'bg-gray-800': !isExerciseInactive(planWorkoutKey, ex.id) && dragState.dragging !== i
+                'bg-[#13131a] opacity-60': isExerciseInactive(planWorkoutKey, ex.id),
+                'bg-[#13131a] opacity-50': dragState.dragging === i,
+                'bg-[#13131a]': !isExerciseInactive(planWorkoutKey, ex.id) && dragState.dragging !== i
               }"
             >
-              <div class="w-10 h-10 rounded-lg bg-gray-700 flex items-center justify-center shrink-0" x-html="getExerciseIcon(ex.icon)"></div>
+              <div class="w-10 h-10 rounded-lg bg-[#1c1c26] flex items-center justify-center shrink-0" x-html="getExerciseIcon(ex.icon)"></div>
               <div class="flex-1 min-w-0">
                 <p class="font-medium" x-text="ex.name"></p>
                 <p class="text-xs text-gray-400" x-text="(ex.sets || 3) + '×' + (ex.reps || 12)"></p>
@@ -318,7 +330,7 @@
         <button
           type="button"
           @click="startWorkoutFromPlan()"
-          class="w-full py-4 rounded-xl bg-blue-500 hover:bg-blue-600 font-bold text-lg"
+          class="w-full py-4 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 font-bold text-lg shadow-[0_0_20px_rgba(168,85,247,0.4)]"
         >
           Начать тренировку
         </button>
@@ -361,11 +373,11 @@
       </div>
     </div>
 
-    <!-- Exercise Card -->
+      <!-- Exercise Card -->
     <div class="p-4">
-      <div class="bg-gray-800 rounded-2xl p-4 mb-4">
+      <div class="bg-[#13131a] rounded-3xl p-4 mb-4 border border-white/5">
         <div class="flex items-start gap-4 mb-4">
-          <div class="w-20 h-20 bg-gray-700 rounded-xl p-2">
+          <div class="w-20 h-20 bg-[#1c1c26] rounded-xl p-2">
             <div x-html="getExerciseIcon(currentExercise?.icon)"></div>
           </div>
           <div class="flex-1">
@@ -411,7 +423,7 @@
               type="button"
               @click="selectedAlt = (selectedAlt === alt ? null : alt); showAlternatives = false"
               class="w-full text-left p-2 rounded-lg text-sm transition-colors"
-              :class="selectedAlt === alt ? 'bg-blue-500/30 border border-blue-500' : 'bg-gray-700'"
+              :class="selectedAlt === alt ? 'bg-purple-500/30 border border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.3)]' : 'bg-[#252532] border border-white/5'"
             >
               <span x-text="alt.name || alt"></span>
               <span x-show="alt.forWhat" class="text-gray-500 block text-xs mt-0.5" x-text="'→ ' + alt.forWhat"></span>
@@ -421,7 +433,7 @@
             type="button"
             x-show="selectedAlt"
             @click="selectedAlt = null"
-            class="w-full text-left p-2 rounded-lg text-sm bg-gray-700"
+            class="w-full text-left p-2 rounded-lg text-sm bg-[#252532] border border-white/5"
           >
             ← Вернуть основное
           </button>
@@ -433,17 +445,18 @@
         <p class="text-sm text-gray-400 mb-2">Записанные подходы:</p>
         <div class="flex flex-wrap gap-2">
           <template x-for="(set, i) in currentExerciseSets" :key="i">
-            <div class="bg-green-500/20 border border-green-500/50 rounded-lg px-3 py-2 text-sm">
-              <span class="text-green-400 font-semibold" x-text="set.weight + ' кг'"></span>
-              <span class="text-gray-400"> × </span>
-              <span x-text="set.reps"></span>
+            <div class="bg-lime-500/20 border border-lime-500/30 rounded-xl px-4 py-2 text-sm inline-flex items-center gap-2">
+              <span class="text-lime-400">✓</span>
+              <span class="text-lime-300 font-semibold" x-text="set.weight + ' кг'"></span>
+              <span class="text-lime-300/50"> × </span>
+              <span class="text-lime-300" x-text="set.reps"></span>
             </div>
           </template>
         </div>
       </div>
 
       <!-- Input Form -->
-      <div class="bg-gray-800 rounded-2xl p-4">
+      <div class="bg-[#13131a] rounded-3xl p-4 border border-white/5">
         <p class="text-center text-gray-400 mb-4">
           Подход <span x-text="currentExerciseSets.length + 1"></span>
         </p>
@@ -455,19 +468,20 @@
             <button
               type="button"
               @click="currentWeight = Math.max(0, currentWeight - 2)"
-              class="w-14 h-14 bg-gray-700 rounded-xl flex items-center justify-center active:bg-gray-600"
+              class="w-14 h-14 bg-[#252532] border border-pink-500/20 rounded-2xl flex items-center justify-center text-pink-400 text-2xl active:bg-pink-500/20 active:scale-95 transition-all"
             >
-              <i data-lucide="minus" class="w-6 h-6"></i>
+              −
             </button>
-            <div class="w-24 text-center">
-              <p class="text-4xl font-bold" x-text="currentWeight"></p>
+            <div class="w-28 text-center">
+              <p class="text-5xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent" x-text="currentWeight"></p>
+              <p class="text-sm text-gray-500">кг</p>
             </div>
             <button
               type="button"
               @click="currentWeight += 2"
-              class="w-14 h-14 bg-gray-700 rounded-xl flex items-center justify-center active:bg-gray-600"
+              class="w-14 h-14 bg-gradient-to-br from-purple-500/30 to-pink-500/30 border border-pink-500/30 rounded-2xl flex items-center justify-center text-pink-300 text-2xl active:from-purple-500/50 active:to-pink-500/50 active:scale-95 transition-all"
             >
-              <i data-lucide="plus" class="w-6 h-6"></i>
+              +
             </button>
           </div>
         </div>
@@ -479,19 +493,20 @@
             <button
               type="button"
               @click="currentReps = Math.max(1, currentReps - 1)"
-              class="w-14 h-14 bg-gray-700 rounded-xl flex items-center justify-center active:bg-gray-600"
+              class="w-14 h-14 bg-[#252532] border border-pink-500/20 rounded-2xl flex items-center justify-center text-pink-400 text-2xl active:bg-pink-500/20 active:scale-95 transition-all"
             >
-              <i data-lucide="minus" class="w-6 h-6"></i>
+              −
             </button>
-            <div class="w-24 text-center">
-              <p class="text-4xl font-bold" x-text="currentReps"></p>
+            <div class="w-28 text-center">
+              <p class="text-5xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent" x-text="currentReps"></p>
+              <p class="text-sm text-gray-500">повт</p>
             </div>
             <button
               type="button"
               @click="currentReps++"
-              class="w-14 h-14 bg-gray-700 rounded-xl flex items-center justify-center active:bg-gray-600"
+              class="w-14 h-14 bg-gradient-to-br from-purple-500/30 to-pink-500/30 border border-pink-500/30 rounded-2xl flex items-center justify-center text-pink-300 text-2xl active:from-purple-500/50 active:to-pink-500/50 active:scale-95 transition-all"
             >
-              <i data-lucide="plus" class="w-6 h-6"></i>
+              +
             </button>
           </div>
         </div>
@@ -500,7 +515,7 @@
         <button
           type="button"
           @click="recordSet()"
-          class="w-full bg-green-500 hover:bg-green-600 rounded-xl py-4 font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+          class="w-full bg-gradient-to-r from-lime-500 to-emerald-600 rounded-xl py-4 font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-[0_0_20px_rgba(132,204,22,0.4)] hover:shadow-[0_0_30px_rgba(132,204,22,0.6)]"
         >
           <i data-lucide="check" class="w-6 h-6"></i>
           Записать подход
@@ -509,13 +524,13 @@
     </div>
 
     <!-- Bottom Navigation -->
-    <div class="fixed bottom-0 left-0 right-0 bg-gray-800 border-t border-gray-700 p-4">
+    <div class="fixed bottom-0 left-0 right-0 bg-[#13131a]/90 backdrop-blur-lg border-t border-white/5 p-4">
       <div class="flex gap-4 max-w-md mx-auto">
         <button
           type="button"
           :disabled="currentExerciseIndex === 0"
           @click="prevExercise()"
-          class="flex-1 bg-gray-700 rounded-xl py-3 font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+          class="flex-1 bg-[#252532] rounded-xl py-3 font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
         >
           <i data-lucide="chevron-left" class="w-5 h-5"></i>
           Назад
@@ -523,7 +538,7 @@
         <button
           type="button"
           @click="nextExercise()"
-          class="flex-1 bg-blue-500 rounded-xl py-3 font-semibold flex items-center justify-center gap-2"
+          class="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl py-3 font-semibold flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(168,85,247,0.4)]"
         >
           Далее
           <i data-lucide="chevron-right" class="w-5 h-5"></i>
@@ -557,14 +572,14 @@
   <!-- ========== СТРАНИЦА: ОТДЫХ (ТАЙМЕР) ========== -->
   <template x-if="page === 'rest'">
   <div class="min-h-screen flex flex-col items-center justify-center p-4">
-    <div class="text-6xl font-bold text-blue-400 mb-4" x-text="restTimer.secondsLeft"></div>
+    <div class="text-6xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent mb-4" x-text="restTimer.secondsLeft"></div>
     <p class="text-gray-400 mb-8" x-text="restTimer.type === 'exercise' ? 'Следующее упражнение' : 'Следующий подход'"></p>
-    <button
-      type="button"
-      @click="endRest()"
-      class="w-full max-w-xs bg-blue-500 hover:bg-blue-600 rounded-xl py-4 font-bold text-lg"
-      x-text="restTimer.type === 'exercise' ? 'Следующее упражнение' : 'Следующий подход'"
-    ></button>
+      <button
+        type="button"
+        @click="endRest()"
+        class="w-full max-w-xs bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-xl py-4 font-bold text-lg shadow-[0_0_20px_rgba(168,85,247,0.4)]"
+        x-text="restTimer.type === 'exercise' ? 'Следующее упражнение' : 'Следующий подход'"
+      ></button>
   </div>
   </template>
 
@@ -574,14 +589,14 @@
     
     <!-- Header -->
     <div class="flex items-center gap-3 mb-6">
-      <button type="button" @click="page = isCardioOnly ? 'select-workout' : 'workout'" class="p-2 hover:bg-gray-800 rounded-lg">
+      <button type="button" @click="page = isCardioOnly ? 'select-workout' : 'workout'" class="p-2 hover:bg-[#13131a] rounded-lg transition-colors">
         <i data-lucide="chevron-left" class="w-6 h-6"></i>
       </button>
       <h1 class="text-xl font-bold" x-text="isCardioOnly ? 'Кардио тренировка' : `Кардио (${currentWorkout?.cardio || 30} мин)`"></h1>
     </div>
 
     <!-- HR Zones reminder -->
-    <div class="bg-gradient-to-r from-red-900/30 to-orange-900/30 rounded-xl p-3 mb-4 border border-red-700/30">
+    <div class="bg-gradient-to-r from-red-900/30 to-orange-900/30 rounded-2xl p-3 mb-4 border border-red-700/30">
       <p class="text-sm text-gray-300 flex items-center gap-2">
         <i data-lucide="heart" class="w-4 h-4 text-red-400"></i>
         Целевой пульс: 
@@ -592,7 +607,7 @@
     </div>
 
     <!-- Cardio Type -->
-    <div class="bg-gray-800 rounded-2xl p-4 mb-4">
+    <div class="bg-[#13131a] rounded-3xl p-4 mb-4 border border-white/5">
       <p class="text-sm text-gray-400 mb-3">Тип кардио</p>
       <div class="grid grid-cols-3 gap-3">
         <template x-for="type in cardioTypes" :key="type.id">
@@ -600,7 +615,7 @@
             type="button"
             @click="cardioData.type = type.id"
             class="p-3 rounded-xl flex flex-col items-center gap-2 transition-colors"
-            :class="cardioData.type === type.id ? 'bg-purple-500' : 'bg-gray-700'"
+            :class="cardioData.type === type.id ? 'bg-gradient-to-br from-cyan-500 to-teal-600 shadow-[0_0_20px_rgba(6,182,212,0.5)]' : 'bg-[#252532]'"
           >
             <div class="w-12 h-12" x-html="getExerciseIcon(type.icon)"></div>
             <span class="text-sm" x-text="type.name"></span>
@@ -610,25 +625,26 @@
     </div>
 
     <!-- Duration -->
-    <div class="bg-gray-800 rounded-2xl p-4 mb-4">
+    <div class="bg-[#13131a] rounded-3xl p-4 mb-4 border border-white/5">
       <p class="text-sm text-gray-400 mb-3">Длительность (минуты)</p>
       <div class="flex items-center justify-center gap-4">
         <button
           type="button"
           @click="cardioData.duration = Math.max(5, cardioData.duration - 5)"
-          class="w-14 h-14 bg-gray-700 rounded-xl flex items-center justify-center"
+          class="w-14 h-14 bg-[#252532] border border-cyan-500/20 rounded-2xl flex items-center justify-center text-cyan-400 text-2xl active:bg-cyan-500/20 active:scale-95 transition-all"
         >
-          <i data-lucide="minus" class="w-6 h-6"></i>
+          −
         </button>
-        <div class="w-24 text-center">
-          <p class="text-4xl font-bold" x-text="cardioData.duration"></p>
+        <div class="w-28 text-center">
+          <p class="text-5xl font-bold bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent" x-text="cardioData.duration"></p>
+          <p class="text-sm text-gray-500">мин</p>
         </div>
         <button
           type="button"
           @click="cardioData.duration += 5"
-          class="w-14 h-14 bg-gray-700 rounded-xl flex items-center justify-center"
+          class="w-14 h-14 bg-gradient-to-br from-cyan-500/30 to-teal-500/30 border border-cyan-500/30 rounded-2xl flex items-center justify-center text-cyan-300 text-2xl active:from-cyan-500/50 active:to-teal-500/50 active:scale-95 transition-all"
         >
-          <i data-lucide="plus" class="w-6 h-6"></i>
+          +
         </button>
       </div>
       
@@ -639,7 +655,7 @@
             type="button"
             @click="cardioData.duration = min"
             class="px-4 py-2 rounded-lg text-sm transition-colors"
-            :class="cardioData.duration === min ? 'bg-purple-500' : 'bg-gray-700'"
+            :class="cardioData.duration === min ? 'bg-gradient-to-br from-cyan-500 to-teal-600 shadow-[0_0_15px_rgba(6,182,212,0.4)]' : 'bg-[#252532]'"
             x-text="min"
           ></button>
         </template>
@@ -647,20 +663,20 @@
     </div>
 
     <!-- Podcast -->
-    <div class="bg-gray-800 rounded-2xl p-4 mb-4">
+    <div class="bg-[#13131a] rounded-3xl p-4 mb-4 border border-white/5">
       <p class="text-sm text-gray-400 mb-2">🎧 Подкаст (опционально)</p>
       <input
         type="text"
         placeholder="NotebookLM: AI архитектура..."
         x-model="cardioData.podcast"
-        class="w-full bg-gray-700 rounded-xl p-3 outline-none focus:ring-2 focus:ring-purple-500"
+        class="w-full bg-[#252532] rounded-xl p-3 outline-none focus:ring-2 focus:ring-cyan-500 border border-white/5"
       >
     </div>
 
     <button
       type="button"
       @click="page = 'complete'; saveSession()"
-      class="w-full bg-purple-500 hover:bg-purple-600 rounded-xl py-4 font-bold text-lg active:scale-[0.98] transition-transform"
+      class="w-full bg-gradient-to-r from-cyan-500 to-teal-600 rounded-xl py-4 font-bold text-lg active:scale-[0.98] transition-all shadow-[0_0_30px_rgba(6,182,212,0.4)] hover:shadow-[0_0_40px_rgba(6,182,212,0.6)]"
       x-text="isCardioOnly ? 'Завершить кардио' : 'Далее →'"
     ></button>
   </div>
@@ -672,19 +688,19 @@
     
     <!-- Success Header -->
     <div class="text-center mb-6">
-      <div class="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-        <i data-lucide="award" class="w-10 h-10 text-green-400"></i>
+      <div class="w-20 h-20 bg-gradient-to-br from-lime-500/20 to-emerald-600/20 border border-lime-500/30 rounded-full flex items-center justify-center mx-auto mb-4 shadow-[0_0_25px_rgba(132,204,22,0.5)]">
+        <i data-lucide="award" class="w-10 h-10 text-lime-400"></i>
       </div>
       <h1 class="text-2xl font-bold mb-2">Отличная работа! 💪</h1>
       <p class="text-gray-400">Осталось оценить самочувствие</p>
     </div>
 
     <!-- Mood Post Workout -->
-    <div class="bg-gray-800 rounded-2xl p-4 mb-4">
+    <div class="bg-[#1c1c26] rounded-3xl p-5 mb-4">
       <p class="text-sm text-gray-400 mb-3">Как себя чувствуешь сейчас?</p>
-      <div class="flex items-center justify-between mb-2">
-        <span class="text-3xl" x-text="getMoodEmoji(moodPost)"></span>
-        <span class="text-4xl font-bold" x-text="moodPost"></span>
+      <div class="flex items-center justify-between mb-4">
+        <span class="text-4xl" x-text="getMoodEmoji(moodPost)"></span>
+        <span class="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent" x-text="moodPost"></span>
       </div>
       <div class="slider-with-fill">
         <div class="slider-track slider-track-bg"></div>
@@ -704,11 +720,11 @@
     </div>
 
     <!-- Mood Day -->
-    <div class="bg-gray-800 rounded-2xl p-4 mb-4">
+    <div class="bg-[#1c1c26] rounded-3xl p-5 mb-4">
       <p class="text-sm text-gray-400 mb-3">Общее самочувствие за день</p>
-      <div class="flex items-center justify-between mb-2">
-        <span class="text-3xl" x-text="getMoodEmoji(moodDay)"></span>
-        <span class="text-4xl font-bold" x-text="moodDay"></span>
+      <div class="flex items-center justify-between mb-4">
+        <span class="text-4xl" x-text="getMoodEmoji(moodDay)"></span>
+        <span class="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent" x-text="moodDay"></span>
       </div>
       <div class="slider-with-fill">
         <div class="slider-track slider-track-bg"></div>
@@ -724,12 +740,12 @@
     </div>
 
     <!-- Notes -->
-    <div class="bg-gray-800 rounded-2xl p-4 mb-6">
+    <div class="bg-[#13131a] rounded-3xl p-4 mb-6 border border-white/5">
       <p class="text-sm text-gray-400 mb-2">📝 Заметки (опционально)</p>
       <textarea
         placeholder="Плечо побаливало, сократил вес на жиме..."
         x-model="notes"
-        class="w-full bg-gray-700 rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px] resize-none"
+        class="w-full bg-[#252532] rounded-xl p-3 outline-none focus:ring-2 focus:ring-purple-500 min-h-[80px] resize-none border border-white/5"
       ></textarea>
     </div>
 
@@ -737,7 +753,7 @@
     <button
       type="button"
       @click="saveWorkout()"
-      class="w-full bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl py-4 font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+      class="w-full bg-gradient-to-r from-lime-500 to-emerald-600 rounded-xl py-4 font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-[0_0_30px_rgba(132,204,22,0.4)] hover:shadow-[0_0_40px_rgba(132,204,22,0.6)]"
     >
       <i data-lucide="check" class="w-6 h-6"></i>
       Сохранить тренировку
@@ -749,56 +765,56 @@
   <template x-if="page === 'edit-workout'">
   <div class="min-h-screen p-4 pb-24">
     <div class="flex items-center gap-3 mb-6">
-      <button type="button" @click="page = 'dashboard'; editingWorkout = null" class="p-2 hover:bg-gray-800 rounded-lg">
+      <button type="button" @click="page = 'dashboard'; editingWorkout = null" class="p-2 hover:bg-[#13131a] rounded-lg transition-colors">
         <i data-lucide="chevron-left" class="w-6 h-6"></i>
       </button>
       <h1 class="text-xl font-bold">Редактировать тренировку</h1>
     </div>
     <template x-if="editingWorkout">
       <div>
-        <div class="bg-gray-800 rounded-2xl p-4 mb-4">
+        <div class="bg-[#13131a] rounded-3xl p-4 mb-4 border border-white/5">
           <p class="text-sm text-gray-400" x-text="editingWorkout.date"></p>
           <p class="font-bold text-lg" x-text="editingWorkout.name"></p>
         </div>
-        <div class="bg-gray-800 rounded-2xl p-4 mb-4">
+        <div class="bg-[#13131a] rounded-3xl p-4 mb-4 border border-white/5">
           <p class="text-sm text-gray-400 mb-3">Подходы</p>
           <template x-for="(set, i) in (editingWorkout.sets || [])" :key="i">
             <div class="flex items-center gap-2 mb-2">
               <span class="text-sm text-gray-500 w-24 shrink-0" x-text="set.exerciseName || 'Сет ' + (i+1)"></span>
-              <input type="number" min="0" step="2" x-model.number="set.weight" class="w-16 bg-gray-700 rounded-lg px-2 py-1 text-center">
+              <input type="number" min="0" step="2" x-model.number="set.weight" class="w-16 bg-[#252532] rounded-lg px-2 py-1 text-center border border-white/5">
               <span class="text-gray-500">кг ×</span>
-              <input type="number" min="1" x-model.number="set.reps" class="w-14 bg-gray-700 rounded-lg px-2 py-1 text-center">
+              <input type="number" min="1" x-model.number="set.reps" class="w-14 bg-[#252532] rounded-lg px-2 py-1 text-center border border-white/5">
               <button type="button" @click="editingWorkout.sets.splice(i, 1)" class="p-1 text-red-400 hover:bg-red-500/20 rounded">
                 <i data-lucide="trash-2" class="w-4 h-4"></i>
               </button>
             </div>
           </template>
         </div>
-        <div class="bg-gray-800 rounded-2xl p-4 mb-4" x-show="editingWorkout.cardio">
+        <div class="bg-[#13131a] rounded-3xl p-4 mb-4 border border-white/5" x-show="editingWorkout.cardio">
           <p class="text-sm text-gray-400 mb-2">Кардио</p>
           <div class="flex items-center gap-2">
-            <input type="number" min="0" x-model.number="editingWorkout.cardio.duration" class="w-20 bg-gray-700 rounded-lg px-2 py-1">
+            <input type="number" min="0" x-model.number="editingWorkout.cardio.duration" class="w-20 bg-[#252532] rounded-lg px-2 py-1 border border-white/5">
             <span class="text-gray-500">мин</span>
           </div>
         </div>
-        <div class="bg-gray-800 rounded-2xl p-4 mb-4">
+        <div class="bg-[#13131a] rounded-3xl p-4 mb-4 border border-white/5">
           <p class="text-sm text-gray-400 mb-2">Настроение после тренировки</p>
           <input type="range" min="1" max="10" x-model.number="editingWorkout.moodPost" class="w-full">
           <span x-text="editingWorkout.moodPost ?? editingWorkout.mood ?? 7"></span>/10
         </div>
-        <div class="bg-gray-800 rounded-2xl p-4 mb-4">
+        <div class="bg-[#13131a] rounded-3xl p-4 mb-4 border border-white/5">
           <p class="text-sm text-gray-400 mb-2">Самочувствие за день</p>
           <input type="range" min="1" max="10" x-model.number="editingWorkout.moodDay" class="w-full">
           <span x-text="editingWorkout.moodDay ?? 7"></span>/10
         </div>
-        <div class="bg-gray-800 rounded-2xl p-4 mb-4">
+        <div class="bg-[#13131a] rounded-3xl p-4 mb-4 border border-white/5">
           <p class="text-sm text-gray-400 mb-2">Заметки</p>
-          <textarea x-model="editingWorkout.notes" class="w-full bg-gray-700 rounded-xl p-3 min-h-[60px]"></textarea>
+          <textarea x-model="editingWorkout.notes" class="w-full bg-[#252532] rounded-xl p-3 min-h-[60px] border border-white/5"></textarea>
         </div>
         <button
           type="button"
           @click="saveEditedWorkout()"
-          class="w-full bg-green-500 hover:bg-green-600 rounded-xl py-3 font-bold"
+          class="w-full bg-gradient-to-r from-lime-500 to-emerald-600 rounded-xl py-3 font-bold shadow-[0_0_20px_rgba(132,204,22,0.4)]"
         >
           Сохранить изменения
         </button>
@@ -811,7 +827,7 @@
   <template x-if="page === 'manage-exercises'">
   <div class="min-h-screen p-4 pb-24">
     <div class="flex items-center gap-3 mb-6">
-      <button type="button" @click="managingWorkoutKey ? backToWorkoutList() : (page = 'select-workout')" class="p-2 hover:bg-gray-800 rounded-lg">
+      <button type="button" @click="managingWorkoutKey ? backToWorkoutList() : (page = 'select-workout')" class="p-2 hover:bg-[#13131a] rounded-lg transition-colors">
         <i data-lucide="chevron-left" class="w-6 h-6"></i>
       </button>
       <h1 class="text-xl font-bold" x-text="managingWorkoutKey ? (workouts[managingWorkoutKey]?.name || '') : 'Управление упражнениями'"></h1>
@@ -820,7 +836,7 @@
     <template x-if="!managingWorkoutKey">
       <div class="space-y-2">
         <template x-for="w in workoutList" :key="w.key">
-          <button type="button" @click="selectWorkoutToManage(w.key)" class="w-full flex items-center gap-3 p-4 rounded-xl bg-gray-800 hover:bg-gray-700">
+          <button type="button" @click="selectWorkoutToManage(w.key)" class="w-full flex items-center gap-3 p-4 rounded-xl bg-[#13131a] hover:bg-[#1c1c26] border border-white/5 transition-colors">
             <span class="text-2xl" x-text="w.emoji"></span>
             <div class="flex-1 text-left">
               <p class="font-bold" x-text="w.name"></p>
@@ -842,14 +858,14 @@
               @dragover.prevent="onDragOver($event, i)"
               @drop="onDrop($event, i, 'manage')"
               @dragend="onDragEnd()"
-              class="flex items-center gap-3 p-3 rounded-xl transition-opacity cursor-move"
+              class="flex items-center gap-3 p-3 rounded-xl transition-opacity cursor-move border border-white/5 hover:bg-[#1c1c26]/50"
               :class="{
-                'bg-gray-800 opacity-60': isExerciseInactive(managingWorkoutKey, ex.id),
-                'bg-gray-800 opacity-50': dragState.dragging === i,
-                'bg-gray-800': !isExerciseInactive(managingWorkoutKey, ex.id) && dragState.dragging !== i
+                'bg-[#13131a] opacity-60': isExerciseInactive(managingWorkoutKey, ex.id),
+                'bg-[#13131a] opacity-50': dragState.dragging === i,
+                'bg-[#13131a]': !isExerciseInactive(managingWorkoutKey, ex.id) && dragState.dragging !== i
               }"
             >
-              <div class="w-10 h-10 rounded-lg bg-gray-700 flex items-center justify-center shrink-0" x-html="getExerciseIcon(ex.icon)"></div>
+              <div class="w-10 h-10 rounded-lg bg-[#1c1c26] flex items-center justify-center shrink-0" x-html="getExerciseIcon(ex.icon)"></div>
               <div class="flex-1 min-w-0">
                 <p class="font-medium" x-text="ex.name"></p>
                 <p class="text-xs text-gray-400" x-text="(ex.sets || 3) + '×' + (ex.reps || 12)"></p>
@@ -858,12 +874,12 @@
                 <input type="checkbox" :checked="isExerciseInactive(managingWorkoutKey, ex.id)" @change="toggleExerciseInactive(managingWorkoutKey, ex.id)" class="rounded">
                 <i data-lucide="eye-off" class="w-4 h-4 text-gray-500"></i>
               </label>
-              <button type="button" @click.stop="startEditExercise(i)" class="p-2 hover:bg-gray-600 rounded-lg"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+              <button type="button" @click.stop="startEditExercise(i)" class="p-2 hover:bg-[#252532] rounded-lg"><i data-lucide="pencil" class="w-4 h-4"></i></button>
               <button type="button" @click.stop="deleteExerciseFromTemplate(i)" class="p-2 hover:bg-red-500/30 rounded-lg text-red-400"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
             </div>
           </template>
         </div>
-        <button type="button" @click="startAddExercise()" class="w-full py-3 rounded-xl bg-blue-500 hover:bg-blue-600 font-semibold flex items-center justify-center gap-2">
+        <button type="button" @click="startAddExercise()" class="w-full py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 font-semibold flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(168,85,247,0.4)]">
           <i data-lucide="plus" class="w-5 h-5"></i>
           Добавить упражнение
         </button>
@@ -871,26 +887,26 @@
     </template>
     
     <template x-if="managingWorkoutKey && editingExerciseIndex !== -1">
-      <div class="bg-gray-800 rounded-2xl p-4">
+      <div class="bg-[#13131a] rounded-3xl p-4 border border-white/5">
         <p class="text-sm text-gray-400 mb-3" x-text="editingExerciseIndex >= 0 ? 'Редактировать' : 'Новое упражнение'"></p>
         <div class="space-y-3">
           <div>
             <label class="text-sm text-gray-400">Название</label>
-            <input type="text" x-model="exerciseForm.name" class="w-full bg-gray-700 rounded-lg p-3 mt-1" placeholder="Жим лёжа">
+            <input type="text" x-model="exerciseForm.name" class="w-full bg-[#252532] rounded-lg p-3 mt-1 border border-white/5" placeholder="Жим лёжа">
           </div>
           <div class="flex gap-3">
             <div class="flex-1">
               <label class="text-sm text-gray-400">Сеты</label>
-              <input type="number" min="1" x-model.number="exerciseForm.sets" class="w-full bg-gray-700 rounded-lg p-3 mt-1">
+              <input type="number" min="1" x-model.number="exerciseForm.sets" class="w-full bg-[#252532] rounded-lg p-3 mt-1 border border-white/5">
             </div>
             <div class="flex-1">
               <label class="text-sm text-gray-400">Повторения</label>
-              <input type="number" min="1" x-model.number="exerciseForm.reps" class="w-full bg-gray-700 rounded-lg p-3 mt-1">
+              <input type="number" min="1" x-model.number="exerciseForm.reps" class="w-full bg-[#252532] rounded-lg p-3 mt-1 border border-white/5">
             </div>
           </div>
           <div>
             <label class="text-sm text-gray-400">Видео (YouTube URL)</label>
-            <input type="url" x-model="exerciseForm.videoUrl" class="w-full bg-gray-700 rounded-lg p-3 mt-1" placeholder="https://youtube.com/watch?v=...">
+            <input type="url" x-model="exerciseForm.videoUrl" class="w-full bg-[#252532] rounded-lg p-3 mt-1 border border-white/5" placeholder="https://youtube.com/watch?v=...">
           </div>
           <div>
             <div class="flex justify-between items-center mb-1">
@@ -898,25 +914,25 @@
               <button type="button" @click="addAltExercise()" class="text-blue-400 text-sm">+ Добавить</button>
             </div>
             <template x-for="(alt, ai) in (exerciseForm.alts || [])" :key="ai">
-              <div class="flex gap-2 mb-2 p-2 rounded-lg bg-gray-700/50">
-                <input type="text" x-model="alt.name" class="flex-1 bg-gray-700 rounded px-2 py-1 text-sm" placeholder="Название">
-                <input type="text" x-model="alt.forWhat" class="flex-1 bg-gray-700 rounded px-2 py-1 text-sm" placeholder="Для чего замена">
-                <input type="url" x-model="alt.videoUrl" class="flex-1 bg-gray-700 rounded px-2 py-1 text-sm" placeholder="YouTube">
+                <div class="flex gap-2 mb-2 p-2 rounded-lg bg-[#1c1c26]/50 border border-white/5">
+                <input type="text" x-model="alt.name" class="flex-1 bg-[#252532] rounded px-2 py-1 text-sm border border-white/5" placeholder="Название">
+                <input type="text" x-model="alt.forWhat" class="flex-1 bg-[#252532] rounded px-2 py-1 text-sm border border-white/5" placeholder="Для чего замена">
+                <input type="url" x-model="alt.videoUrl" class="flex-1 bg-[#252532] rounded px-2 py-1 text-sm border border-white/5" placeholder="YouTube">
                 <button type="button" @click="removeAltExercise(ai)" class="p-1 text-red-400 shrink-0"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
               </div>
             </template>
           </div>
           <div>
             <label class="text-sm text-gray-400">Иконка</label>
-            <select x-model="exerciseForm.icon" class="w-full bg-gray-700 rounded-lg p-3 mt-1">
+            <select x-model="exerciseForm.icon" class="w-full bg-[#252532] rounded-lg p-3 mt-1 border border-white/5">
               <template x-for="k in getIconKeys()" :key="k">
                 <option :value="k" x-text="k"></option>
               </template>
             </select>
           </div>
           <div class="flex gap-2">
-            <button type="button" @click="saveExercise()" class="flex-1 py-3 rounded-xl bg-green-500 hover:bg-green-600 font-semibold">Сохранить</button>
-            <button type="button" @click="editingExerciseIndex = -1" class="flex-1 py-3 rounded-xl bg-gray-700 hover:bg-gray-600 font-semibold">Отмена</button>
+            <button type="button" @click="saveExercise()" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-lime-500 to-emerald-600 hover:from-lime-600 hover:to-emerald-700 font-semibold shadow-[0_0_15px_rgba(132,204,22,0.4)]">Сохранить</button>
+            <button type="button" @click="editingExerciseIndex = -1" class="flex-1 py-3 rounded-xl bg-[#252532] hover:bg-[#1c1c26] font-semibold">Отмена</button>
           </div>
         </div>
       </div>
