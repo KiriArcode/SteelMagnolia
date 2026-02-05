@@ -83,7 +83,7 @@ function gymTracker() {
     
     // Profile
     profile: {
-      name: 'Николай',
+      name: 'Кристина',
       age: 36,
       maxHR: 184,
       fatBurnLow: 110,

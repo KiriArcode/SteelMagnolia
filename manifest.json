@@ -1,6 +1,6 @@
 {
-  "name": "GymBro",
-  "short_name": "GYM",
+  "name": "SteelMagnolia",
+  "short_name": "STEEL",
   "description": "Трекер тренировок",
   "start_url": "./",
   "display": "standalone",
