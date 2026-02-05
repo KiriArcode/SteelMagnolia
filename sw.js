@@ -20,12 +20,42 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-// Fetch
+// Fetch - Network first strategy для HTML, cache first для остального
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => response || fetch(event.request))
-  );
+  const url = new URL(event.request.url);
+  
+  // Для HTML файлов - сначала сеть, потом кеш
+  if (event.request.destination === 'document' || url.pathname === '/' || url.pathname.endsWith('.html')) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          // Клонируем ответ для кеширования
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseClone);
+          });
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
+  } else {
+    // Для остальных файлов - сначала кеш, потом сеть
+    event.respondWith(
+      caches.match(event.request)
+        .then((response) => {
+          if (response) {
+            return response;
+          }
+          return fetch(event.request).then((response) => {
+            const responseClone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseClone);
+            });
+            return response;
+          });
+        })
+    );
+  }
 });
 
 // Activate
