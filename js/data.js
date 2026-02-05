@@ -5,7 +5,7 @@ const WORKOUT_TEMPLATES = {
   tuesday: {
     name: 'Upper Body',
     emoji: '💪',
-    gradient: 'bg-gradient-to-r from-blue-500 to-blue-600',
+    gradient: 'bg-gradient-to-r from-purple-500 to-violet-600',
     cardio: 30,
     exercises: [
       { 
@@ -68,7 +68,7 @@ const WORKOUT_TEMPLATES = {
   thursday: {
     name: 'Lower Body',
     emoji: '🦵',
-    gradient: 'bg-gradient-to-r from-green-500 to-green-600',
+    gradient: 'bg-gradient-to-r from-pink-500 to-rose-600',
     cardio: 20,
     exercises: [
       { 
@@ -122,7 +122,7 @@ const WORKOUT_TEMPLATES = {
   saturday: {
     name: 'Full Body + Core',
     emoji: '🔥',
-    gradient: 'bg-gradient-to-r from-orange-500 to-red-500',
+    gradient: 'bg-gradient-to-r from-pink-500 via-purple-500 to-orange-500',
     cardio: 30,
     exercises: [
       { 
