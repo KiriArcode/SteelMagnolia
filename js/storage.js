@@ -9,6 +9,12 @@ const Storage = {
     SESSION: 'gym_session',
     TEMPLATES: 'gym_templates',
     INACTIVE: 'gym_inactive',
+    CYCLE: 'gym_cycle',
+    MEASUREMENTS: 'gym_measurements',
+    ACHIEVEMENTS: 'gym_achievements',
+    STRETCH_SESSIONS: 'gym_stretch_sessions',
+    NUTRITION: 'gym_nutrition',
+    CHALLENGES: 'gym_challenges',
   },
   
   // ===== WORKOUTS =====
@@ -249,6 +255,170 @@ const Storage = {
     return this.saveInactive(data);
   },
   
+  // ===== CYCLE =====
+  getCycle() {
+    try {
+      const data = localStorage.getItem(this.KEYS.CYCLE);
+      return data ? JSON.parse(data) : null;
+    } catch (e) {
+      console.error('Error reading cycle:', e);
+      return null;
+    }
+  },
+  
+  saveCycle(cycle) {
+    try {
+      localStorage.setItem(this.KEYS.CYCLE, JSON.stringify(cycle));
+      return true;
+    } catch (e) {
+      console.error('Error saving cycle:', e);
+      return false;
+    }
+  },
+  
+  // ===== MEASUREMENTS =====
+  getMeasurements() {
+    try {
+      const data = localStorage.getItem(this.KEYS.MEASUREMENTS);
+      return data ? JSON.parse(data) : [];
+    } catch (e) {
+      console.error('Error reading measurements:', e);
+      return [];
+    }
+  },
+  
+  saveMeasurement(measurement) {
+    try {
+      const measurements = this.getMeasurements();
+      measurements.unshift(measurement);
+      // Keep only last 50 measurements
+      if (measurements.length > 50) {
+        measurements.pop();
+      }
+      localStorage.setItem(this.KEYS.MEASUREMENTS, JSON.stringify(measurements));
+      return true;
+    } catch (e) {
+      console.error('Error saving measurement:', e);
+      return false;
+    }
+  },
+  
+  // ===== ACHIEVEMENTS =====
+  getAchievements() {
+    try {
+      const data = localStorage.getItem(this.KEYS.ACHIEVEMENTS);
+      return data ? JSON.parse(data) : [];
+    } catch (e) {
+      console.error('Error reading achievements:', e);
+      return [];
+    }
+  },
+  
+  saveAchievements(achievements) {
+    try {
+      localStorage.setItem(this.KEYS.ACHIEVEMENTS, JSON.stringify(achievements));
+      return true;
+    } catch (e) {
+      console.error('Error saving achievements:', e);
+      return false;
+    }
+  },
+  
+  unlockAchievement(id) {
+    try {
+      const achievements = this.getAchievements();
+      const achievement = achievements.find(a => a.id === id);
+      if (achievement && !achievement.unlocked) {
+        achievement.unlocked = true;
+        achievement.dateUnlocked = new Date().toISOString();
+        this.saveAchievements(achievements);
+        return achievement;
+      }
+      return null;
+    } catch (e) {
+      console.error('Error unlocking achievement:', e);
+      return null;
+    }
+  },
+  
+  // ===== STRETCH SESSIONS =====
+  getStretchSessions() {
+    try {
+      const data = localStorage.getItem(this.KEYS.STRETCH_SESSIONS);
+      return data ? JSON.parse(data) : [];
+    } catch (e) {
+      console.error('Error reading stretch sessions:', e);
+      return [];
+    }
+  },
+  
+  saveStretchSession(session) {
+    try {
+      const sessions = this.getStretchSessions();
+      sessions.unshift(session);
+      if (sessions.length > 100) {
+        sessions.pop();
+      }
+      localStorage.setItem(this.KEYS.STRETCH_SESSIONS, JSON.stringify(sessions));
+      return true;
+    } catch (e) {
+      console.error('Error saving stretch session:', e);
+      return false;
+    }
+  },
+  
+  // ===== NUTRITION =====
+  getNutrition() {
+    try {
+      const data = localStorage.getItem(this.KEYS.NUTRITION);
+      return data ? JSON.parse(data) : [];
+    } catch (e) {
+      console.error('Error reading nutrition:', e);
+      return [];
+    }
+  },
+  
+  saveNutritionEntry(entry) {
+    try {
+      const entries = this.getNutrition();
+      const existingIdx = entries.findIndex(e => e.date === entry.date);
+      if (existingIdx !== -1) {
+        entries[existingIdx] = entry;
+      } else {
+        entries.unshift(entry);
+      }
+      if (entries.length > 365) {
+        entries.pop();
+      }
+      localStorage.setItem(this.KEYS.NUTRITION, JSON.stringify(entries));
+      return true;
+    } catch (e) {
+      console.error('Error saving nutrition entry:', e);
+      return false;
+    }
+  },
+  
+  // ===== CHALLENGES =====
+  getChallenges() {
+    try {
+      const data = localStorage.getItem(this.KEYS.CHALLENGES);
+      return data ? JSON.parse(data) : [];
+    } catch (e) {
+      console.error('Error reading challenges:', e);
+      return [];
+    }
+  },
+  
+  saveChallenges(challenges) {
+    try {
+      localStorage.setItem(this.KEYS.CHALLENGES, JSON.stringify(challenges));
+      return true;
+    } catch (e) {
+      console.error('Error saving challenges:', e);
+      return false;
+    }
+  },
+  
   // ===== CLEAR =====
   clearAll() {
     localStorage.removeItem(this.KEYS.WORKOUTS);
@@ -257,5 +427,11 @@ const Storage = {
     localStorage.removeItem(this.KEYS.SESSION);
     localStorage.removeItem(this.KEYS.TEMPLATES);
     localStorage.removeItem(this.KEYS.INACTIVE);
+    localStorage.removeItem(this.KEYS.CYCLE);
+    localStorage.removeItem(this.KEYS.MEASUREMENTS);
+    localStorage.removeItem(this.KEYS.ACHIEVEMENTS);
+    localStorage.removeItem(this.KEYS.STRETCH_SESSIONS);
+    localStorage.removeItem(this.KEYS.NUTRITION);
+    localStorage.removeItem(this.KEYS.CHALLENGES);
   }
 };

@@ -90,6 +90,14 @@ function gymTracker() {
       fatBurnHigh: 138,
       intervalLow: 147,
       intervalHigh: 166,
+      // Новые поля для женского фитнеса
+      goal: 'tone', // 'lose' | 'gain' | 'tone' | 'maintain'
+      cycleDay: null,
+      cycleLength: 28,
+      lastPeriodStart: null,
+      level: 1,
+      xp: 0,
+      totalXp: 0,
     },
     
     // Stats
@@ -162,6 +170,18 @@ function gymTracker() {
     videoModalOpen: false,
     videoModalUrl: '',
     
+    // Новые состояния для женского фитнеса
+    measurements: [],
+    achievements: [],
+    stretchPrograms: [],
+    currentStretchProgram: null,
+    currentStretchExerciseIndex: 0,
+    stretchTimer: { secondsLeft: 0, intervalId: null },
+    nutritionEntries: [],
+    challenges: [],
+    newAchievementUnlocked: null, // Для показа уведомления
+    measurementForm: { waist: '', hips: '', chest: '', arm: '', neck: '', weight: '', photo: null },
+    
     // ===== COMPUTED =====
     get currentExercise() {
       if (!this.currentWorkout || !this.currentWorkout.exercises) {
@@ -215,14 +235,23 @@ function gymTracker() {
         }
       }
       
+      // Инициализация новых данных для женского фитнеса
+      this.initAchievements();
+      this.initStretchPrograms();
+      this.measurements = this.getMeasurements();
+      
       // Расчёт пульсовых зон
       this.calculateHRZones();
       
-      // Очистка сессии при выходе из тренировки
+      // Очистка сессии при выходе из тренировки и обновление иконок
       if (this.$watch) {
         this.$watch('page', (value) => {
           if ((value === 'dashboard' || value === 'select-workout') && typeof Storage !== 'undefined' && Storage.clearSession) {
             Storage.clearSession();
+          }
+          // Обновление иконок Lucide при смене страницы
+          if (typeof lucide !== 'undefined') {
+            setTimeout(() => lucide.createIcons(), 100);
           }
         });
       }
@@ -351,6 +380,10 @@ function gymTracker() {
         reps: this.currentReps,
         timestamp: new Date().toISOString(),
       });
+      
+      // Добавление XP за подход
+      this.addXP(5);
+      
       this.saveSession();
       
       const targetSets = this.currentExercise.sets || 3;
@@ -453,6 +486,16 @@ function gymTracker() {
       if (typeof Storage !== 'undefined' && Storage.saveWorkout) {
         Storage.saveWorkout(workout);
         this.updateStats(workout);
+        
+        // Добавление XP за тренировку
+        if (this.isCardioOnly) {
+          this.addXP(50); // Кардио сессия
+        } else {
+          this.addXP(100); // Полная тренировка
+        }
+        
+        // Проверка достижений
+        this.checkAchievements();
       } else {
         console.warn('Storage not available, workout not saved');
       }
@@ -958,6 +1001,460 @@ function gymTracker() {
       this.loadData();
       this.page = 'dashboard';
     },
+    
+    // ========================================
+    // НОВЫЕ ФУНКЦИИ ДЛЯ ЖЕНСКОГО ФИТНЕСА
+    // ========================================
+    
+    // F-301: Календарь цикла
+    getCyclePhase() {
+      if (!this.profile.lastPeriodStart || !this.profile.cycleDay) {
+        return { phase: 'unknown', emoji: '❓', name: 'Не указано', recommendation: 'Укажите день цикла в настройках' };
+      }
+      
+      const day = this.profile.cycleDay;
+      const length = this.profile.cycleLength || 28;
+      
+      if (day >= 1 && day <= 14) {
+        return {
+          phase: 'follicular',
+          emoji: '🌸',
+          name: 'Фолликулярная фаза',
+          recommendation: 'Силовые тренировки, высокие веса. Идеальное время для прогресса!',
+          color: 'from-pink-500 to-rose-600'
+        };
+      } else if (day >= 13 && day <= 16) {
+        return {
+          phase: 'ovulation',
+          emoji: '🔥',
+          name: 'Овуляция',
+          recommendation: 'Пиковая производительность! Отличный день для PR и интенсивных тренировок.',
+          color: 'from-orange-500 to-red-600'
+        };
+      } else if (day >= 17 && day <= length) {
+        return {
+          phase: 'luteal',
+          emoji: '🌙',
+          name: 'Лютеиновая фаза',
+          recommendation: 'Кардио, низкая интенсивность, растяжка. Слушайте своё тело.',
+          color: 'from-purple-500 to-indigo-600'
+        };
+      }
+      
+      return { phase: 'unknown', emoji: '❓', name: 'Не указано', recommendation: 'Укажите день цикла' };
+    },
+    
+    updateCycleDay(day) {
+      this.profile.cycleDay = day;
+      if (typeof Storage !== 'undefined' && Storage.saveProfile) {
+        Storage.saveProfile(this.profile);
+      }
+    },
+    
+    setPeriodStart(date) {
+      this.profile.lastPeriodStart = date;
+      this.profile.cycleDay = 1;
+      if (typeof Storage !== 'undefined' && Storage.saveProfile) {
+        Storage.saveProfile(this.profile);
+      }
+    },
+    
+    // F-310: Система уровней и XP
+    getLevelInfo(level) {
+      const levels = {
+        1: { name: 'Новичок', emoji: '🌱', xpRequired: 0 },
+        2: { name: 'Старт взят', emoji: '🌿', xpRequired: 500 },
+        3: { name: 'В ритме', emoji: '🌸', xpRequired: 1500 },
+        4: { name: 'Набираю силу', emoji: '💪', xpRequired: 3000 },
+        5: { name: 'Фитнес-леди', emoji: '🔥', xpRequired: 5000 },
+        6: { name: 'Сильная', emoji: '⚡', xpRequired: 8000 },
+        7: { name: 'Железная воля', emoji: '💎', xpRequired: 12000 },
+        8: { name: 'Королева зала', emoji: '👑', xpRequired: 20000 },
+        9: { name: 'Легенда', emoji: '🏆', xpRequired: 30000 },
+        10: { name: 'Мифическая', emoji: '✨', xpRequired: 50000 },
+      };
+      
+      // Для уровней выше 10 используем формулу
+      if (level > 10) {
+        const baseXP = 50000;
+        const xpPerLevel = 10000;
+        const xpRequired = baseXP + (level - 10) * xpPerLevel;
+        return { name: `Уровень ${level}`, emoji: '🌟', xpRequired };
+      }
+      
+      return levels[level] || levels[1];
+    },
+    
+    addXP(amount) {
+      if (!amount || amount <= 0) return;
+      
+      const oldLevel = this.profile.level;
+      this.profile.xp += amount;
+      this.profile.totalXp += amount;
+      
+      // Проверка повышения уровня
+      let newLevel = this.profile.level;
+      let xpForNextLevel = this.getLevelInfo(newLevel + 1).xpRequired;
+      
+      while (this.profile.totalXp >= xpForNextLevel && newLevel < 20) {
+        newLevel++;
+        xpForNextLevel = this.getLevelInfo(newLevel + 1).xpRequired;
+      }
+      
+      if (newLevel > oldLevel) {
+        this.profile.level = newLevel;
+        this.newAchievementUnlocked = {
+          type: 'level',
+          message: `Поздравляем! Вы достигли уровня ${newLevel}!`,
+          emoji: this.getLevelInfo(newLevel).emoji
+        };
+        setTimeout(() => { this.newAchievementUnlocked = null; }, 5000);
+      }
+      
+      // Сохранение профиля
+      if (typeof Storage !== 'undefined' && Storage.saveProfile) {
+        Storage.saveProfile(this.profile);
+      }
+    },
+    
+    getXPProgress() {
+      const currentLevelInfo = this.getLevelInfo(this.profile.level);
+      const nextLevelInfo = this.getLevelInfo(this.profile.level + 1);
+      const xpForCurrent = currentLevelInfo.xpRequired;
+      const xpForNext = nextLevelInfo.xpRequired;
+      const xpInLevel = this.profile.totalXp - xpForCurrent;
+      const xpNeeded = xpForNext - xpForCurrent;
+      const progress = xpNeeded > 0 ? (xpInLevel / xpNeeded) * 100 : 100;
+      
+      return {
+        current: this.profile.totalXp,
+        needed: xpForNext,
+        progress: Math.min(100, Math.max(0, progress)),
+        xpInLevel,
+        xpNeeded: xpNeeded - xpInLevel
+      };
+    },
+    
+    // F-309: Система достижений
+    initAchievements() {
+      const defaultAchievements = [
+        { id: 'first_workout', name: 'Первый шаг', emoji: '🎯', description: 'Завершите первую тренировку', unlocked: false, dateUnlocked: null },
+        { id: 'week_streak', name: 'Неделя огня', emoji: '🔥', description: '7 тренировок подряд', unlocked: false, dateUnlocked: null },
+        { id: 'month_streak', name: 'Месяц силы', emoji: '💎', description: '30 дней подряд', unlocked: false, dateUnlocked: null },
+        { id: 'hundred_workouts', name: 'Сотня', emoji: '💯', description: '100 тренировок всего', unlocked: false, dateUnlocked: null },
+        { id: 'pr_breaker', name: 'Рекордсменка', emoji: '📈', description: 'Установите новый персональный рекорд', unlocked: false, dateUnlocked: null },
+        { id: 'full_week', name: 'Идеальная неделя', emoji: '⭐', description: 'Тренировки все 7 дней недели', unlocked: false, dateUnlocked: null },
+        { id: 'cardio_master', name: 'Кардио-мастер', emoji: '🏃‍♀️', description: '1000 минут кардио', unlocked: false, dateUnlocked: null },
+        { id: 'glute_master', name: 'Glute Master', emoji: '🍑', description: '50 подходов ягодичных упражнений', unlocked: false, dateUnlocked: null },
+      ];
+      
+      if (typeof Storage !== 'undefined' && Storage.getAchievements) {
+        const saved = Storage.getAchievements();
+        if (saved && saved.length > 0) {
+          // Объединяем сохранённые с дефолтными
+          const merged = defaultAchievements.map(def => {
+            const savedAchievement = saved.find(s => s.id === def.id);
+            return savedAchievement || def;
+          });
+          this.achievements = merged;
+        } else {
+          this.achievements = defaultAchievements;
+          Storage.saveAchievements(this.achievements);
+        }
+      } else {
+        this.achievements = defaultAchievements;
+      }
+    },
+    
+    checkAchievements() {
+      if (!this.achievements || this.achievements.length === 0) {
+        this.initAchievements();
+      }
+      
+      const workouts = typeof Storage !== 'undefined' && Storage.getWorkouts ? Storage.getWorkouts() : [];
+      const totalWorkouts = workouts.length;
+      const streak = this.stats.streak || 0;
+      
+      // Проверка достижений
+      const checks = {
+        first_workout: totalWorkouts >= 1,
+        week_streak: streak >= 7,
+        month_streak: streak >= 30,
+        hundred_workouts: totalWorkouts >= 100,
+        full_week: this.stats.weekCompleted >= 7,
+        cardio_master: this.stats.cardioMinutes >= 1000,
+      };
+      
+      let unlockedAny = false;
+      for (const [id, condition] of Object.entries(checks)) {
+        const achievement = this.achievements.find(a => a.id === id);
+        if (achievement && condition && !achievement.unlocked) {
+          achievement.unlocked = true;
+          achievement.dateUnlocked = new Date().toISOString();
+          unlockedAny = true;
+          
+          this.newAchievementUnlocked = {
+            type: 'achievement',
+            message: achievement.name,
+            emoji: achievement.emoji,
+            description: achievement.description
+          };
+          setTimeout(() => { this.newAchievementUnlocked = null; }, 5000);
+        }
+      }
+      
+      if (unlockedAny && typeof Storage !== 'undefined' && Storage.saveAchievements) {
+        Storage.saveAchievements(this.achievements);
+      }
+    },
+    
+    // F-303: Трекинг измерений
+    getMeasurements() {
+      if (typeof Storage !== 'undefined' && Storage.getMeasurements) {
+        this.measurements = Storage.getMeasurements();
+      }
+      return this.measurements || [];
+    },
+    
+    saveMeasurement(data) {
+      const measurement = {
+        id: Date.now(),
+        date: new Date().toISOString(),
+        dateStr: new Date().toLocaleDateString('ru-RU'),
+        waist: data.waist ? parseFloat(data.waist) : null,
+        hips: data.hips ? parseFloat(data.hips) : null,
+        chest: data.chest ? parseFloat(data.chest) : null,
+        arm: data.arm ? parseFloat(data.arm) : null,
+        neck: data.neck ? parseFloat(data.neck) : null,
+        weight: data.weight ? parseFloat(data.weight) : null,
+        photo: data.photo || null, // base64
+      };
+      
+      if (typeof Storage !== 'undefined' && Storage.saveMeasurement) {
+        Storage.saveMeasurement(measurement);
+        this.measurements.unshift(measurement);
+        // Лимит фото
+        if (this.measurements.filter(m => m.photo).length > 10) {
+          const withPhotos = this.measurements.filter(m => m.photo);
+          const toRemove = withPhotos.slice(10);
+          toRemove.forEach(m => {
+            const idx = this.measurements.findIndex(meas => meas.id === m.id);
+            if (idx !== -1) {
+              this.measurements[idx].photo = null;
+            }
+          });
+        }
+      }
+    },
+    
+    getMeasurementChange(metric) {
+      if (!this.measurements || this.measurements.length < 2) return null;
+      const latest = this.measurements[0][metric];
+      const previous = this.measurements[1][metric];
+      if (!latest || !previous) return null;
+      const change = latest - previous;
+      const percent = (change / previous) * 100;
+      return { change, percent, isPositive: change < 0 }; // Для обхватов меньше = лучше
+    },
+    
+    // F-305: Выбор цели
+    getGoalRecommendations() {
+      const recommendations = {
+        lose: {
+          cardio: '45-60 минут кардио 4-5 раз в неделю',
+          strength: 'Силовые тренировки 2-3 раза в неделю для сохранения мышц',
+          nutrition: 'Дефицит калорий 300-500 ккал в день'
+        },
+        gain: {
+          cardio: '20-30 минут кардио 2-3 раза в неделю',
+          strength: 'Силовые тренировки 4-5 раз в неделю, фокус на прогрессии',
+          nutrition: 'Профицит калорий 300-500 ккал в день, больше белка'
+        },
+        tone: {
+          cardio: '30-45 минут кардио 3-4 раза в неделю',
+          strength: 'Силовые тренировки 3-4 раза в неделю, комбо подходы',
+          nutrition: 'Баланс калорий, акцент на белок и овощи'
+        },
+        maintain: {
+          cardio: '30 минут кардио 2-3 раза в неделю',
+          strength: 'Силовые тренировки 3 раза в неделю для поддержания формы',
+          nutrition: 'Баланс калорий, разнообразное питание'
+        }
+      };
+      return recommendations[this.profile.goal] || recommendations.tone;
+    },
+    
+    // F-307: Растяжка
+    initStretchPrograms() {
+      this.stretchPrograms = [
+        {
+          id: 'morning',
+          name: 'Утренняя растяжка',
+          duration: 10,
+          emoji: '🌅',
+          exercises: [
+            { name: 'Наклоны вперёд', duration: 30, description: 'Растяжка задней поверхности бедра' },
+            { name: 'Повороты корпуса', duration: 20, description: 'Мобильность позвоночника' },
+            { name: 'Растяжка шеи', duration: 15, description: 'Круговые движения головой' },
+            { name: 'Растяжка плеч', duration: 20, description: 'Руки за спиной' },
+            { name: 'Глубокие приседания', duration: 30, description: 'Удержание позиции' },
+          ]
+        },
+        {
+          id: 'post_workout',
+          name: 'После тренировки',
+          duration: 15,
+          emoji: '💪',
+          exercises: [
+            { name: 'Растяжка квадрицепса', duration: 30, description: 'Стоя, нога назад' },
+            { name: 'Растяжка ягодиц', duration: 30, description: 'Лёжа, колено к груди' },
+            { name: 'Растяжка груди', duration: 30, description: 'У стены' },
+            { name: 'Растяжка спины', duration: 30, description: 'Колени к груди лёжа' },
+            { name: 'Растяжка икр', duration: 30, description: 'Наклон к стене' },
+          ]
+        },
+        {
+          id: 'evening',
+          name: 'Вечерняя расслабляющая',
+          duration: 20,
+          emoji: '🌙',
+          exercises: [
+            { name: 'Детская поза', duration: 60, description: 'Расслабление всего тела' },
+            { name: 'Скручивания лёжа', duration: 30, description: 'Растяжка спины и бёдер' },
+            { name: 'Бабочка', duration: 45, description: 'Растяжка внутренней поверхности бедра' },
+            { name: 'Наклон вперёд сидя', duration: 45, description: 'Растяжка задней поверхности' },
+            { name: 'Шпагат (подготовка)', duration: 60, description: 'Растяжка для шпагата' },
+          ]
+        },
+        {
+          id: 'glutes',
+          name: 'Растяжка для ягодиц',
+          duration: 15,
+          emoji: '🍑',
+          exercises: [
+            { name: 'Растяжка ягодиц лёжа', duration: 45, description: 'Колено к противоположному плечу' },
+            { name: 'Голубь', duration: 60, description: 'Классическая поза для ягодиц' },
+            { name: 'Растяжка ягодиц стоя', duration: 30, description: 'Нога на колене' },
+            { name: 'Растяжка грушевидной', duration: 45, description: 'Лёжа, нога на колене' },
+          ]
+        }
+      ];
+    },
+    
+    startStretchProgram(programId) {
+      const program = this.stretchPrograms.find(p => p.id === programId);
+      if (!program) return;
+      this.currentStretchProgram = JSON.parse(JSON.stringify(program));
+      this.currentStretchExerciseIndex = 0;
+      this.page = 'stretch';
+    },
+    
+    completeStretchSession() {
+      if (!this.currentStretchProgram) return;
+      
+      const session = {
+        id: Date.now(),
+        date: new Date().toISOString(),
+        programId: this.currentStretchProgram.id,
+        programName: this.currentStretchProgram.name,
+        duration: this.currentStretchProgram.duration,
+      };
+      
+      if (typeof Storage !== 'undefined' && Storage.saveStretchSession) {
+        Storage.saveStretchSession(session);
+      }
+      
+      this.addXP(30); // XP за растяжку
+      this.currentStretchProgram = null;
+      this.currentStretchExerciseIndex = 0;
+      this.page = 'dashboard';
+    },
+    
+    // F-312: Питание
+    getNutritionForToday() {
+      const today = new Date().toISOString().split('T')[0];
+      if (typeof Storage !== 'undefined' && Storage.getNutrition) {
+        const entries = Storage.getNutrition();
+        return entries.find(e => e.date === today) || { date: today, meals: [] };
+      }
+      return { date: today, meals: [] };
+    },
+    
+    saveNutritionForToday(meals) {
+      const today = new Date().toISOString().split('T')[0];
+      const entry = {
+        date: today,
+        meals: meals || []
+      };
+      
+      if (typeof Storage !== 'undefined' && Storage.saveNutritionEntry) {
+        Storage.saveNutritionEntry(entry);
+      }
+    },
+    
+    calculateBMR() {
+      // Формула Миффлина-Сан Жеора для женщин
+      // BMR = 10 × вес(кг) + 6.25 × рост(см) - 5 × возраст - 161
+      // Упрощённая версия без роста (используем средний рост 165 см)
+      const weight = this.measurements[0]?.weight || 60; // Предполагаемый вес
+      const height = 165; // Средний рост
+      const age = this.profile.age;
+      const bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+      
+      // TDEE = BMR × коэффициент активности
+      // 1.2 - сидячий, 1.375 - лёгкая активность, 1.55 - умеренная, 1.725 - высокая
+      const activityFactor = 1.55; // Умеренная активность
+      const tdee = bmr * activityFactor;
+      
+      return { bmr: Math.round(bmr), tdee: Math.round(tdee) };
+    },
+    
+    // Обработка загрузки фото
+    handlePhotoUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.measurementForm.photo = e.target.result; // base64
+      };
+      reader.readAsDataURL(file);
+    },
+    
+    // Таймер растяжки
+    startStretchTimer() {
+      if (!this.currentStretchProgram) return;
+      const exercise = this.currentStretchProgram.exercises[this.currentStretchExerciseIndex];
+      if (!exercise) return;
+      
+      this.stretchTimer.secondsLeft = exercise.duration;
+      
+      this.stretchTimer.intervalId = setInterval(() => {
+        this.stretchTimer.secondsLeft--;
+        if (this.stretchTimer.secondsLeft <= 0) {
+          clearInterval(this.stretchTimer.intervalId);
+          this.stretchTimer.intervalId = null;
+          this.nextStretchExercise();
+        }
+      }, 1000);
+    },
+    
+    nextStretchExercise() {
+      if (!this.currentStretchProgram) return;
+      if (this.currentStretchExerciseIndex < this.currentStretchProgram.exercises.length - 1) {
+        this.currentStretchExerciseIndex++;
+        this.stretchTimer.secondsLeft = this.currentStretchProgram.exercises[this.currentStretchExerciseIndex].duration;
+      }
+    },
+    
+    skipStretchExercise() {
+      if (this.stretchTimer.intervalId) {
+        clearInterval(this.stretchTimer.intervalId);
+        this.stretchTimer.intervalId = null;
+      }
+      this.nextStretchExercise();
+    },
+    
   };
 }
 
