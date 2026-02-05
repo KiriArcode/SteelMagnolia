@@ -151,6 +151,9 @@ function gymTracker() {
     planWorkoutKey: null,
     inactiveVersion: 0,
     
+    // Drag and drop state
+    dragState: { dragging: null, over: null },
+    
     // Video modal
     videoModalOpen: false,
     videoModalUrl: '',
@@ -222,6 +225,17 @@ function gymTracker() {
       
       // Сохранение сессии при закрытии/перезагрузке
       window.addEventListener('beforeunload', () => this.saveSession());
+      
+      // Обработка навигации браузера (предотвращение использования кнопок назад/вперед)
+      window.addEventListener('popstate', (event) => {
+        // Предотвращаем навигацию назад/вперед, остаёмся на текущей странице
+        if (this.page !== 'dashboard' && this.page !== 'select-workout') {
+          history.pushState(null, '', window.location.href);
+        }
+      });
+      
+      // Инициализация history state для предотвращения навигации назад
+      history.replaceState(null, '', window.location.href);
       
       this.isReady = true;
       console.log('✅ GymBro ready!');
@@ -473,7 +487,10 @@ function gymTracker() {
       if (typeof Storage !== 'undefined' && Storage.getWorkouts) {
         const allWorkouts = Storage.getWorkouts();
         if (allWorkouts.length > 0) {
-          const totalMood = allWorkouts.reduce((sum, w) => sum + (w.moodPost || 7), 0);
+          const totalMood = allWorkouts.reduce((sum, w) => {
+            const mood = Number(w.moodPost) || Number(w.mood) || 7;
+            return sum + mood;
+          }, 0);
           this.stats.avgMood = totalMood / allWorkouts.length;
         }
       }
@@ -868,6 +885,57 @@ function gymTracker() {
         Storage.saveTemplates(this.workouts);
       }
       this.editingExerciseIndex = -1;
+    },
+    
+    // Drag and drop methods
+    onDragStart(event, index) {
+      this.dragState.dragging = index;
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', index.toString());
+    },
+    
+    onDragOver(event, index) {
+      event.preventDefault();
+      this.dragState.over = index;
+    },
+    
+    onDragEnd() {
+      this.dragState = { dragging: null, over: null };
+    },
+    
+    onDrop(event, targetIndex, context) {
+      event.preventDefault();
+      const sourceIndex = parseInt(event.dataTransfer.getData('text/plain'));
+      
+      if (sourceIndex === targetIndex) {
+        this.dragState = { dragging: null, over: null };
+        return;
+      }
+      
+      // Context: 'plan' for workout-plan screen, 'manage' for manage-exercises screen
+      if (context === 'plan' && this.planWorkoutKey) {
+        const exercises = [...(this.workouts[this.planWorkoutKey]?.exercises || [])];
+        const [moved] = exercises.splice(sourceIndex, 1);
+        exercises.splice(targetIndex, 0, moved);
+        this.workouts[this.planWorkoutKey] = { ...this.workouts[this.planWorkoutKey], exercises };
+        
+        // Save templates if it's a template
+        if (typeof Storage !== 'undefined' && Storage.saveTemplates) {
+          Storage.saveTemplates(this.workouts);
+        }
+      } else if (context === 'manage' && this.managingWorkoutKey) {
+        const exercises = [...(this.workouts[this.managingWorkoutKey]?.exercises || [])];
+        const [moved] = exercises.splice(sourceIndex, 1);
+        exercises.splice(targetIndex, 0, moved);
+        this.workouts[this.managingWorkoutKey] = { ...this.workouts[this.managingWorkoutKey], exercises };
+        this.workoutList = Object.entries(this.workouts).map(([k, v]) => ({ key: k, ...v }));
+        
+        if (typeof Storage !== 'undefined' && Storage.saveTemplates) {
+          Storage.saveTemplates(this.workouts);
+        }
+      }
+      
+      this.dragState = { dragging: null, over: null };
     },
     
     saveEditedWorkout() {

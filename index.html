@@ -291,15 +291,24 @@
         <div class="space-y-2 mb-6" :data-ver="inactiveVersion">
           <template x-for="(ex, i) in (workouts[planWorkoutKey]?.exercises || [])" :key="ex.id + '_' + (inactiveVersion || 0)">
             <div 
-              class="flex items-center gap-3 p-3 rounded-xl transition-opacity"
-              :class="isExerciseInactive(planWorkoutKey, ex.id) ? 'bg-gray-800 opacity-60' : 'bg-gray-800'"
+              draggable="true"
+              @dragstart="onDragStart($event, i)"
+              @dragover.prevent="onDragOver($event, i)"
+              @drop="onDrop($event, i, 'plan')"
+              @dragend="onDragEnd()"
+              class="flex items-center gap-3 p-3 rounded-xl transition-opacity cursor-move"
+              :class="{
+                'bg-gray-800 opacity-60': isExerciseInactive(planWorkoutKey, ex.id),
+                'bg-gray-800 opacity-50': dragState.dragging === i,
+                'bg-gray-800': !isExerciseInactive(planWorkoutKey, ex.id) && dragState.dragging !== i
+              }"
             >
               <div class="w-10 h-10 rounded-lg bg-gray-700 flex items-center justify-center shrink-0" x-html="getExerciseIcon(ex.icon)"></div>
               <div class="flex-1 min-w-0">
                 <p class="font-medium" x-text="ex.name"></p>
                 <p class="text-xs text-gray-400" x-text="(ex.sets || 3) + '×' + (ex.reps || 12)"></p>
               </div>
-              <label class="flex items-center gap-2 shrink-0 cursor-pointer">
+              <label class="flex items-center gap-2 shrink-0 cursor-pointer" @click.stop>
                 <input type="checkbox" :checked="isExerciseInactive(planWorkoutKey, ex.id)" @change="toggleExerciseInactive(planWorkoutKey, ex.id)" class="rounded">
                 <span class="text-xs text-gray-500">Нет в зале</span>
               </label>
@@ -828,20 +837,29 @@
         <div class="space-y-2 mb-4" :data-ver="inactiveVersion">
           <template x-for="(ex, i) in (workouts[managingWorkoutKey]?.exercises || [])" :key="ex.id + '_' + (inactiveVersion || 0)">
             <div 
-              class="flex items-center gap-3 p-3 rounded-xl transition-opacity"
-              :class="isExerciseInactive(managingWorkoutKey, ex.id) ? 'bg-gray-800 opacity-60' : 'bg-gray-800'"
+              draggable="true"
+              @dragstart="onDragStart($event, i)"
+              @dragover.prevent="onDragOver($event, i)"
+              @drop="onDrop($event, i, 'manage')"
+              @dragend="onDragEnd()"
+              class="flex items-center gap-3 p-3 rounded-xl transition-opacity cursor-move"
+              :class="{
+                'bg-gray-800 opacity-60': isExerciseInactive(managingWorkoutKey, ex.id),
+                'bg-gray-800 opacity-50': dragState.dragging === i,
+                'bg-gray-800': !isExerciseInactive(managingWorkoutKey, ex.id) && dragState.dragging !== i
+              }"
             >
               <div class="w-10 h-10 rounded-lg bg-gray-700 flex items-center justify-center shrink-0" x-html="getExerciseIcon(ex.icon)"></div>
               <div class="flex-1 min-w-0">
                 <p class="font-medium" x-text="ex.name"></p>
                 <p class="text-xs text-gray-400" x-text="(ex.sets || 3) + '×' + (ex.reps || 12)"></p>
               </div>
-              <label class="flex items-center gap-1 shrink-0 cursor-pointer" title="Нет в моем зале">
+              <label class="flex items-center gap-1 shrink-0 cursor-pointer" title="Нет в моем зале" @click.stop>
                 <input type="checkbox" :checked="isExerciseInactive(managingWorkoutKey, ex.id)" @change="toggleExerciseInactive(managingWorkoutKey, ex.id)" class="rounded">
                 <i data-lucide="eye-off" class="w-4 h-4 text-gray-500"></i>
               </label>
-              <button type="button" @click="startEditExercise(i)" class="p-2 hover:bg-gray-600 rounded-lg"><i data-lucide="pencil" class="w-4 h-4"></i></button>
-              <button type="button" @click="deleteExerciseFromTemplate(i)" class="p-2 hover:bg-red-500/30 rounded-lg text-red-400"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+              <button type="button" @click.stop="startEditExercise(i)" class="p-2 hover:bg-gray-600 rounded-lg"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+              <button type="button" @click.stop="deleteExerciseFromTemplate(i)" class="p-2 hover:bg-red-500/30 rounded-lg text-red-400"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
             </div>
           </template>
         </div>
