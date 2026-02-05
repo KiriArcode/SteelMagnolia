@@ -181,7 +181,8 @@ function gymTracker() {
     challenges: [],
     newAchievementUnlocked: null, // Для показа уведомления
     measurementForm: { waist: '', hips: '', chest: '', arm: '', neck: '', weight: '', photo: null },
-    showCyclePhaseInfo: false, // Показывать ли подсказку о фазе цикла
+    showCyclePhaseInfo: false, // Тултип фазы: закреплён по клику
+    cycleTooltipHover: false,  // Тултип фазы: показан при наведении
     
     // ===== COMPUTED =====
     get currentExercise() {
