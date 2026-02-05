@@ -227,4 +227,58 @@ const EXERCISE_ICONS = {
       <path d="M32 34 L40 36 L41 44" stroke="white" stroke-width="2"/>
     </svg>
   `,
+  
+  elliptical: `
+    <svg viewBox="0 0 64 64" class="w-full h-full">
+      <ellipse cx="32" cy="48" rx="24" ry="8" fill="white" opacity="0.3" rx="4"/>
+      <circle cx="20" cy="32" r="6" fill="none" stroke="white" stroke-width="3"/>
+      <circle cx="44" cy="32" r="6" fill="none" stroke="white" stroke-width="3"/>
+      <path d="M20 32 Q32 20 44 32" stroke="white" stroke-width="3" fill="none"/>
+      <path d="M20 32 Q32 44 44 32" stroke="white" stroke-width="3" fill="none"/>
+      <circle cx="32" cy="16" r="5" fill="white" opacity="0.8"/>
+      <line x1="32" y1="21" x2="32" y2="26" stroke="white" stroke-width="3"/>
+    </svg>
+  `,
+  
+  rower: `
+    <svg viewBox="0 0 64 64" class="w-full h-full">
+      <rect x="8" y="40" width="48" height="8" fill="white" opacity="0.5" rx="2"/>
+      <circle cx="16" cy="20" r="4" fill="white" opacity="0.8"/>
+      <line x1="16" y1="24" x2="16" y2="40" stroke="white" stroke-width="3"/>
+      <path d="M16 28 L32 24 L48 20" stroke="white" stroke-width="3" stroke-linecap="round"/>
+      <path d="M48 20 L56 12" stroke="white" stroke-width="3" stroke-linecap="round"/>
+      <rect x="52" y="8" width="8" height="6" fill="white" rx="2"/>
+      <circle cx="32" cy="28" r="3" fill="white"/>
+      <line x1="24" y1="40" x2="24" y2="56" stroke="white" stroke-width="2"/>
+      <line x1="40" y1="40" x2="40" y2="56" stroke="white" stroke-width="2"/>
+    </svg>
+  `,
+  
+  ski: `
+    <svg viewBox="0 0 64 64" class="w-full h-full">
+      <rect x="12" y="8" width="40" height="6" fill="white" opacity="0.5" rx="2"/>
+      <line x1="20" y1="14" x2="20" y2="28" stroke="white" stroke-width="3"/>
+      <line x1="44" y1="14" x2="44" y2="28" stroke="white" stroke-width="3"/>
+      <circle cx="32" cy="32" r="5" fill="white" opacity="0.8"/>
+      <line x1="32" y1="37" x2="32" y2="52" stroke="white" stroke-width="4"/>
+      <path d="M32 40 L24 48 L24 56" stroke="white" stroke-width="2"/>
+      <path d="M32 40 L40 48 L40 56" stroke="white" stroke-width="2"/>
+      <path d="M16 28 L20 32 L24 28" stroke="white" stroke-width="2" stroke-linecap="round"/>
+      <path d="M40 28 L44 32 L48 28" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  `,
+  
+  stairmaster: `
+    <svg viewBox="0 0 64 64" class="w-full h-full">
+      <rect x="8" y="52" width="48" height="8" fill="white" opacity="0.5" rx="2"/>
+      <rect x="12" y="44" width="10" height="4" fill="white" rx="1"/>
+      <rect x="24" y="38" width="10" height="4" fill="white" rx="1"/>
+      <rect x="36" y="32" width="10" height="4" fill="white" rx="1"/>
+      <rect x="48" y="26" width="10" height="4" fill="white" rx="1"/>
+      <circle cx="32" cy="16" r="5" fill="white" opacity="0.8"/>
+      <line x1="32" y1="21" x2="32" y2="24" stroke="white" stroke-width="3"/>
+      <path d="M32 24 L24 30 L24 38" stroke="white" stroke-width="2"/>
+      <path d="M32 24 L40 28 L40 32" stroke="white" stroke-width="2"/>
+    </svg>
+  `,
 };

@@ -14,7 +14,7 @@ const WORKOUT_TEMPLATES_FALLBACK = {
   tuesday: {
     name: 'Upper Body',
     emoji: '💪',
-    gradient: 'bg-gradient-to-r from-blue-500 to-blue-600',
+    gradient: 'bg-gradient-to-r from-purple-500 to-violet-600',
     cardio: 30,
     exercises: [
       { id: 'lat_pulldown', name: 'Тяга верхнего блока', sets: 3, reps: 12, icon: 'lat_pulldown', lastWeight: 45, alts: ['Подтягивания'] },
@@ -27,7 +27,7 @@ const WORKOUT_TEMPLATES_FALLBACK = {
   thursday: {
     name: 'Lower Body',
     emoji: '🦵',
-    gradient: 'bg-gradient-to-r from-green-500 to-green-600',
+    gradient: 'bg-gradient-to-r from-pink-500 to-rose-600',
     cardio: 20,
     exercises: [
       { id: 'leg_press', name: 'Жим ногами', sets: 3, reps: 15, icon: 'leg_press', lastWeight: 100, alts: [] },
@@ -39,7 +39,7 @@ const WORKOUT_TEMPLATES_FALLBACK = {
   saturday: {
     name: 'Full Body + Core',
     emoji: '🔥',
-    gradient: 'bg-gradient-to-r from-orange-500 to-red-500',
+    gradient: 'bg-gradient-to-r from-pink-500 via-purple-500 to-orange-500',
     cardio: 30,
     exercises: [
       { id: 'pull_up', name: 'Подтягивания', sets: 3, reps: 10, icon: 'pull_up', lastWeight: -30, alts: [] },
@@ -124,8 +124,12 @@ function gymTracker() {
     },
     cardioTypes: [
       { id: 'treadmill', name: 'Дорожка', icon: 'treadmill' },
+      { id: 'elliptical', name: 'Эллипсоид', icon: 'elliptical' },
       { id: 'bike', name: 'Велосипед', icon: 'bike' },
+      { id: 'rower', name: 'Гребля', icon: 'rower' },
       { id: 'stepper', name: 'Степпер', icon: 'stepper' },
+      { id: 'ski', name: 'Лыжи', icon: 'ski' },
+      { id: 'stairmaster', name: 'Лестница', icon: 'stairmaster' },
     ],
     
     // Mood
