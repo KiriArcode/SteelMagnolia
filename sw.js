@@ -1,4 +1,4 @@
-const CACHE_NAME = 'steelmagnoliaPWA-v9';
+const CACHE_NAME = 'steelmagnoliaPWA-v10';
 const urlsToCache = [
   './',
   './index.html',
